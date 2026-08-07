@@ -1,0 +1,50 @@
+import { BlogPost } from "./types";
+
+export const initialPosts: BlogPost[] = [
+  {
+    id: 1,
+    title: "The Art of the Banarasi Saree: A Heritage Weave",
+    excerpt: "Explore the intricate craftsmanship and rich history behind India's most celebrated silk weave. From the looms of Varanasi to modern bridal wear.",
+    category: "Heritage",
+    date: "July 24, 2026",
+    author: "Aditi Sharma",
+    image: "/products/product-clt/Saree-red.png",
+  },
+  {
+    id: 2,
+    title: "Bespoke Bridal Trends for the Modern Couture Bride",
+    excerpt: "An in-depth look at this season's bridal styling guides, color palettes, and custom customizations designed to bring heritage craftsmanship alive.",
+    category: "Bridal",
+    date: "July 15, 2026",
+    author: "Rohit Mehta",
+    image: "/login/login-campaign2.png",
+    featured: true,
+  },
+  {
+    id: 3,
+    title: "Maison Showcase: Inside Our Flagship Boutique Interior",
+    excerpt: "Take an exclusive walkthrough of our newly updated flagship boutique salons in Mumbai and Mayfair, designed to offer premium private bridal fittings.",
+    category: "Behind the Scenes",
+    date: "June 28, 2026",
+    author: "Karan Johar",
+    image: "/boutique_showroom.png",
+  },
+  {
+    id: 4,
+    title: "Custom Tailoring: Finding Your Perfect Sherwani Fit",
+    excerpt: "Proper measurements, select custom sizing, and silhouette choices play a massive role in selecting your sherwani. Here is our master styling guide.",
+    category: "Styling Guides",
+    date: "June 12, 2026",
+    author: "Vikram Dev",
+    image: "/products/men/sherwani/sherwani1/sherwani1.jpg",
+  },
+  {
+    id: 5,
+    title: "Preserving Handloom Crafts: The Weaver's Legacy",
+    excerpt: "How IndiNest collaborates directly with local weavers across regional craft clusters to create sustainable, heritage-rich traditional luxury wear.",
+    category: "Heritage",
+    date: "May 20, 2026",
+    author: "Aditi Sharma",
+    image: "/banner/b4.jpg",
+  },
+];

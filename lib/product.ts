@@ -1,0 +1,144 @@
+import { apiBaseUrl } from '@/lib/api';
+
+export interface StorefrontProduct {
+  id: number;
+  slug: string;
+  name: string;
+  sku?: string | null;
+  brand: { name: string } | null;
+  category: { slug: string } | null;
+  featured_image: string | null;
+  gallery?: string[];
+  price: number;
+  strikedPrice?: number;
+  min_price?: number;
+  max_price?: number;
+  rating?: number;
+  review_count?: number;
+  is_featured?: boolean;
+  variants?: Array<{
+    id: number;
+    sku: string | null;
+    name: string | null;
+    size?: string | null;
+    price: number;
+    buying_price?: number | null;
+    strikedPrice?: number;
+    stock: number;
+  }>;
+  description?: string | null;
+  key_features?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+}
+
+export interface ProductCardModel {
+  id: string;
+  slug?: string;
+  brand?: string;
+  title: string;
+  image: string;
+  price: number;
+  originalPrice?: number | null;
+  strikedPrice?: number;
+  discount?: string;
+  rating?: number;
+  reviews?: number;
+  isFeatured?: boolean;
+  category?: string;
+  variants?: Array<{
+    id: number;
+    sku: string | null;
+    name: string | null;
+    size?: string | null;
+    price: number;
+    buying_price?: number | null;
+    strikedPrice?: number;
+    stock: number;
+  }>;
+}
+
+export const DEFAULT_PRODUCT_IMAGE = '/logo/mock-logo.png';
+
+export function resolveProductImageUrl(image?: string | null, fallback = DEFAULT_PRODUCT_IMAGE): string {
+  if (!image) return fallback;
+
+  const trimmed = image.trim();
+  if (!trimmed) return fallback;
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  const baseUrl = apiBaseUrl.replace(/\/+$/, '');
+
+  if (!baseUrl) {
+    if (trimmed.startsWith('/')) return trimmed;
+    return `/${trimmed}`;
+  }
+
+  if (trimmed.startsWith('/')) {
+    if (trimmed.startsWith('/storage/') || trimmed.startsWith('/uploads/') || trimmed.startsWith('/media/')) {
+      return `${baseUrl}${trimmed}`;
+    }
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('storage/') || trimmed.startsWith('uploads/') || trimmed.startsWith('media/') || trimmed.startsWith('api/')) {
+    return `${baseUrl}/${trimmed}`;
+  }
+
+  return `${baseUrl}/${trimmed}`;
+}
+
+export function hasInStockVariant(product: StorefrontProduct): boolean {
+  if (!product.variants || product.variants.length === 0) {
+    return false;
+  }
+
+  return product.variants.some((variant) => (variant.stock ?? 0) > 0);
+}
+
+export function getLowestPriceVariant<T extends { price: number; stock?: number }>(variants?: T[] | null): T | null {
+  if (!variants?.length) return null;
+
+  const availableVariants = variants.filter((variant) => (variant.stock ?? 0) > 0);
+  const sourceVariants = availableVariants.length > 0 ? availableVariants : variants;
+
+  return sourceVariants.reduce<T | null>((lowest, current) => {
+    if (!lowest) return current;
+    return current.price < lowest.price ? current : lowest;
+  }, null);
+}
+
+export function toProductCardModel(product: StorefrontProduct): ProductCardModel {
+  const variant = getLowestPriceVariant(product.variants);
+  const activePrice = variant?.price ?? product.price ?? 0;
+  const buyingPrice = variant?.buying_price ?? null;
+  const originalPrice = buyingPrice && buyingPrice > activePrice
+    ? buyingPrice
+    : undefined;
+
+  return {
+    id: String(product.id),
+    slug: product.slug,
+    brand: product.brand?.name,
+    title: product.name,
+    image: resolveProductImageUrl(product.featured_image),
+    price: activePrice,
+    strikedPrice: undefined,
+    originalPrice,
+    discount: originalPrice != null && originalPrice > activePrice
+      ? `${Math.max(1, Math.round((1 - (activePrice / originalPrice)) * 100))}%`
+      : undefined,
+    rating: product.rating || 0,
+    reviews: product.review_count || 0,
+    isFeatured: Boolean(product.is_featured),
+    category: product.category?.slug,
+    variants: product.variants,
+  };
+}
+
+export function formatPrice(price: number): string {
+  return `£ ${price.toLocaleString('en-GB')}`;
+}

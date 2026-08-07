@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand: #010526;
+  --color-brand-light: #F0F2FF;
+  --font-serif: var(--font-pt-serif), serif;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #010526;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Force horizontal scrolling to hide scrollbars for a cleaner carousel look */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Ensure all clickable items display a pointer cursor */
+a,
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+select,
+summary {
+  cursor: pointer !important;
+}
+
+/* Premium micro-scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(1, 5, 38, 0.2);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(1, 5, 38, 0.4);
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(1, 5, 38, 0.2) transparent;
+}
