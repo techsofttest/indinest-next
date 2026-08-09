@@ -57,3 +57,33 @@ summary {
   scrollbar-width: thin;
   scrollbar-color: rgba(1, 5, 38, 0.2) transparent;
 }
+
+/* Styling for Rich Editor content */
+.rich-content ul {
+  list-style-type: disc !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.rich-content ol {
+  list-style-type: decimal !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.rich-content li {
+  margin-bottom: 0.25rem !important;
+}
+
+.rich-content p {
+  margin-bottom: 0.75rem !important;
+}
+
+.rich-content strong {
+  font-weight: 700 !important;
+}
+
+.rich-content a {
+  text-decoration: underline !important;
+  color: inherit !important;
+}

@@ -4,20 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { X, Plus, Minus, Trash2, ArrowRight, ShoppingBag, AlertTriangle } from "lucide-react";
-import { useCart } from "@/components/context/CartContext";
-
-interface CartItem {
-  id: string;
-  name: string;
-  brand: string;
-  price: number;
-  image: string;
-  size: string;
-  sizes?: string[];
-  colour: string;
-  quantity: number;
-  isOutOfStock?: boolean;
-}
+import { useCart, CartItem } from "@/components/context/CartContext";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -31,7 +18,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const updateQuantity = (id: string, delta: number) => {
     const item = cartItems.find((item) => item.id === id);
     if (!item) return;
-    const nextQuantity = Math.max(1, item.quantity + delta);
+    const maxStock = item.stock ?? 99;
+    const nextQuantity = Math.max(1, Math.min(item.quantity + delta, maxStock));
     updateCartItem(id, { quantity: nextQuantity });
   };
 
@@ -110,11 +98,10 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               <div key={item.id} className="flex gap-4 py-4 border-b border-[#010526]/10 items-start">
                 {/* Product Thumbnail */}
                 <div className="relative w-20 h-28 bg-[#010526]/5 overflow-hidden flex-shrink-0">
-                  <Image
+                  <img
                     src={item.image}
                     alt={item.name}
-                    fill
-                    className="object-cover object-top"
+                    className="w-full h-full object-cover object-top"
                   />
                 </div>
 
@@ -127,53 +114,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     {item.name}
                   </h4>
                   <div className="text-xs text-[#010526]/85 font-sans mt-1.5 flex items-center gap-3 flex-wrap">
-                    {!["S", "M", "L", "XL", "XXL"].includes(item.size ?? "") ? (
-                      <span>Size: <strong className="text-[#010526] font-bold">{item.size ?? "One Size"}</strong></span>
-                    ) : (
-                      <span className="flex items-center gap-1 relative">
-                        <span>Size:</span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveDropdownId(activeDropdownId === item.id ? null : item.id);
-                          }}
-                          className="flex items-center gap-1 bg-transparent border border-[#010526]/20 px-2 py-0.5 text-xs text-[#010526] font-bold outline-none cursor-pointer hover:bg-[#010526]/5 transition-colors rounded-sm"
-                        >
-                          <span>{item.size}</span>
-                          <span className="text-[9px] text-[#010526]/60">▼</span>
-                        </button>
-
-                        {activeDropdownId === item.id && (
-                          <>
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => setActiveDropdownId(null)}
-                            />
-                            <div className="absolute top-full left-0 mt-1 bg-white border border-[#010526]/20 shadow-lg rounded-sm py-1 z-20 min-w-[70px]">
-                              {["S", "M", "L", "XL", "XXL"].map((sz) => {
-                                const isAvailable = !item.sizes || item.sizes.includes(sz);
-                                return (
-                                  <button
-                                    key={sz}
-                                    disabled={!isAvailable}
-                                    onClick={() => {
-                                      updateSize(item.id, sz);
-                                      setActiveDropdownId(null);
-                                    }}
-                                    className={`w-full text-left px-3 py-1.5 text-xs font-bold transition-colors ${isAvailable
-                                        ? "text-[#010526] hover:bg-[#010526]/5"
-                                        : "line-through text-[#010526]/30 cursor-not-allowed bg-[#010526]/[0.02]"
-                                      }`}
-                                  >
-                                    {sz}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </>
-                        )}
-                      </span>
-                    )}
+                    <span>Size: <strong className="text-[#010526] font-bold">{item.size ?? "One Size"}</strong></span>
                     <span>|</span>
                     <span>Color: <strong className="text-[#010526] font-bold">{item.colour}</strong></span>
                   </div>
@@ -201,7 +142,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       </span>
                       <button
                         onClick={() => updateQuantity(item.id, 1)}
-                        className="px-2.5 py-1.5 text-[#010526]/90 hover:bg-[#010526]/5 transition-colors cursor-pointer"
+                        disabled={item.quantity >= (item.stock ?? 99)}
+                        className="px-2.5 py-1.5 text-[#010526]/90 hover:bg-[#010526]/5 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <Plus size={12} />
                       </button>
@@ -238,16 +180,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <ShoppingBag size={14} />
                 <span>Check Your Bag</span>
               </Link>
-              <button
-                onClick={() => {
-                  alert("Proceeding to checkout...");
-                  onClose();
-                }}
-                className="w-full py-3 bg-[#010526] text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer"
+              <Link
+                href="/checkout"
+                onClick={onClose}
+                className="w-full py-3 bg-[#010526] text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer text-center"
               >
                 <span>Checkout Now</span>
                 <ArrowRight size={14} />
-              </button>
+              </Link>
             </div>
           </div>
         )}

@@ -16,6 +16,9 @@ export interface Product {
   packContains?: string;
   manufacturedBy?: string;
   speciality?: string;
+  styleFitTips?: string | null;
+  shippingReturns?: string | null;
+  faq?: string | null;
   demand?: number;
   isBestSeller?: boolean;
   isNewArrival?: boolean;

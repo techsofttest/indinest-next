@@ -17,6 +17,7 @@ export interface CartItem {
   variant_name?: string | null;
   isOutOfStock?: boolean;
   sizes?: string[];
+  stock?: number;
 }
 
 interface CartContextType {
@@ -70,6 +71,7 @@ function normalizeCartItem(item: any): CartItem {
     variant_name: item.variant_name !== undefined ? String(item.variant_name) : null,
     isOutOfStock: Boolean(item.isOutOfStock),
     sizes: Array.isArray(item.sizes) ? item.sizes.map(String) : undefined,
+    stock: item.stock !== undefined && item.stock !== null ? Number(item.stock) : 99,
   };
 }
 
@@ -228,12 +230,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     );
 
     const nextCart = [...cartItems];
+    const maxStock = parsedItem.stock ?? 99;
     if (existingIndex !== -1) {
+      const targetQty = Math.min(nextCart[existingIndex].quantity + parsedItem.quantity, maxStock);
       nextCart[existingIndex] = {
         ...nextCart[existingIndex],
-        quantity: nextCart[existingIndex].quantity + parsedItem.quantity,
+        quantity: Math.max(1, targetQty),
       };
     } else {
+      parsedItem.quantity = Math.max(1, Math.min(parsedItem.quantity, maxStock));
       nextCart.push(parsedItem);
     }
 
@@ -267,9 +272,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    const nextCart = cartItems.map((item) =>
-      item.id === id ? { ...item, ...updates, quantity: updates.quantity ?? item.quantity } : item
-    );
+    const nextCart = cartItems.map((item) => {
+      if (item.id === id) {
+        const maxStock = item.stock ?? 99;
+        const targetQty = updates.quantity !== undefined
+          ? Math.max(1, Math.min(updates.quantity, maxStock))
+          : item.quantity;
+        return { ...item, ...updates, quantity: targetQty };
+      }
+      return item;
+    });
     setCart(nextCart);
   };
 

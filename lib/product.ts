@@ -28,6 +28,12 @@ export interface StorefrontProduct {
   }>;
   description?: string | null;
   key_features?: string | null;
+  style_fit_tips?: string | null;
+  shipping_returns?: string | null;
+  faq?: string | null;
+  fabric?: string | null;
+  colour?: string | null;
+  occasion?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
 }

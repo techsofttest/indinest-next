@@ -1,7 +1,28 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import Image from "next/image";
+import { apiUrl } from "@/lib/api";
 
 export default function Footer() {
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadFooterCategories() {
+      try {
+        const res = await fetch(apiUrl("/api/storefront/categories"));
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data ?? []);
+        }
+      } catch (err) {
+        console.error("Failed to load categories in Footer:", err);
+      }
+    }
+    loadFooterCategories();
+  }, []);
+
   return (
     <footer className="w-full max-w-[1600px] mx-auto pt-8 pb-8 px-4 md:px-8">
 
@@ -235,14 +256,11 @@ export default function Footer() {
         </div>
         <div className="flex flex-col gap-3">
           <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Categories</h5>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Sarees</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Readymade Blouses</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Jewellery</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Kaftans</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Salwar Suits</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Kurtas</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Kids' Wear</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Men's Wear</a>
+          {categories.slice(0, 8).map((cat: any) => (
+            <a key={cat.id} href={`/category/${cat.slug}`} className="text-[#010526]/70 hover:text-[#010526]">
+              {cat.name}
+            </a>
+          ))}
         </div>
       </div>
 

@@ -254,54 +254,55 @@ export default function ProductInfoPanel({
             {product.speciality && (
               <>
                 <p className="font-bold text-[#010526]/80 mb-2">Product Speciality :</p>
-                <p className="leading-relaxed text-[#010526]/80 font-light">
-                  {product.speciality}
-                </p>
+                <div 
+                  className="leading-relaxed text-[#010526]/80 font-light rich-content"
+                  dangerouslySetInnerHTML={{ __html: product.speciality }}
+                />
               </>
             )}
           </AccordionItem>
         )}
+        {product.styleFitTips && (
+          <AccordionItem
+            id="styleFit"
+            label="Style & Fit Tips"
+            isOpen={openAccordions.styleFit}
+            toggle={() => toggleAccordion("styleFit")}
+          >
+            <div 
+              className="rich-content"
+              dangerouslySetInnerHTML={{ __html: product.styleFitTips }}
+            />
+          </AccordionItem>
+        )}
 
-        <AccordionItem
-          id="styleFit"
-          label="Style & Fit Tips"
-          isOpen={openAccordions.styleFit}
-          toggle={() => toggleAccordion("styleFit")}
-        >
-          Ethnic wear outfits are designed to have a slightly looser silhouette. If you are in
-          between sizes, we recommend ordering the larger size for a more relaxed and comfortable fit.
-        </AccordionItem>
+        {product.shippingReturns && (
+          <AccordionItem
+            id="shippingReturns"
+            label="Shipping & Returns"
+            isOpen={openAccordions.shippingReturns}
+            toggle={() => toggleAccordion("shippingReturns")}
+          >
+            <div 
+              className="rich-content"
+              dangerouslySetInnerHTML={{ __html: product.shippingReturns }}
+            />
+          </AccordionItem>
+        )}
 
-        <AccordionItem
-          id="shippingReturns"
-          label="Shipping & Returns"
-          isOpen={openAccordions.shippingReturns}
-          toggle={() => toggleAccordion("shippingReturns")}
-        >
-          Standard shipping takes 5–7 business days across our delivery regions. Easy returns and
-          exchanges are available within 5 days of delivery for eligible items.
-        </AccordionItem>
-
-        <AccordionItem
-          id="faqs"
-          label="FAQs"
-          isOpen={openAccordions.faqs}
-          toggle={() => toggleAccordion("faqs")}
-        >
-          <div className="flex flex-col gap-3">
-            <p>
-              <strong>Q: Is custom tailoring available?</strong>
-              <br />
-              A: We currently offer standard sizes. For custom modifications, please consult our size
-              guide or contact support.
-            </p>
-            <p>
-              <strong>Q: What is the fabric care instruction?</strong>
-              <br />
-              A: Dry clean only is recommended to preserve the premium weave and embroidery details.
-            </p>
-          </div>
-        </AccordionItem>
+        {product.faq && (
+          <AccordionItem
+            id="faqs"
+            label="FAQs"
+            isOpen={openAccordions.faqs}
+            toggle={() => toggleAccordion("faqs")}
+          >
+            <div 
+              className="rich-content"
+              dangerouslySetInnerHTML={{ __html: product.faq }}
+            />
+          </AccordionItem>
+        )}
       </div>
     </div>
   );

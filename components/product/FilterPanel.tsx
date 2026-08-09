@@ -11,10 +11,25 @@ interface FilterPanelProps {
     label: string;
     options: string[];
   }[];
+  priceRange?: [number, number];
+  onPriceRangeChange?: (range: [number, number]) => void;
 }
 
-export default function FilterPanel({ activeFilters, onToggle, onClear, filterConfig }: FilterPanelProps) {
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+export default function FilterPanel({
+  activeFilters,
+  onToggle,
+  onClear,
+  filterConfig,
+  priceRange,
+  onPriceRangeChange,
+}: FilterPanelProps) {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    price: true,
+    occasion: true,
+    fabric: true,
+    colour: true,
+    brand: true,
+  });
 
   const toggleSection = (id: string) => {
     setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -96,37 +111,85 @@ export default function FilterPanel({ activeFilters, onToggle, onClear, filterCo
                   isOpen ? "max-h-[400px] pb-4" : "max-h-0"
                 }`}
               >
-                <div className="flex flex-col gap-3">
-                  {filter.options.map((option) => {
-                    const checked = activeFilters[filter.id]?.includes(option) ?? false;
-                    return (
-                      <label
-                        key={option}
-                        className="flex items-center gap-3 cursor-pointer group"
-                        onClick={() => onToggle(filter.id, option)}
-                      >
-                        <span
-                          className={`w-5 h-5 border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${
-                            checked ? "bg-[#010526] border-[#010526]" : "border-[#010526]/30 group-hover:border-[#010526]"
-                          }`}
+                {filter.id === "price" && priceRange && onPriceRangeChange ? (
+                  <div className="flex flex-col gap-4 font-sans mt-2 px-1">
+                    <div className="flex items-center justify-between text-xs text-[#010526] font-semibold">
+                      <span>Min: £{priceRange[0]}</span>
+                      <span>Max: £{priceRange[1]}</span>
+                    </div>
+                    <div className="flex flex-col gap-2 relative">
+                      {/* Range slider for Maximum Price */}
+                      <input
+                        type="range"
+                        min="5"
+                        max="1000"
+                        value={priceRange[1]}
+                        onChange={(e) => onPriceRangeChange([priceRange[0], parseInt(e.target.value) || 1000])}
+                        className="w-full h-1 bg-[#010526]/10 rounded-lg appearance-none cursor-pointer accent-[#010526]"
+                      />
+                    </div>
+                    {/* Manual inputs for Min and Max */}
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        min="5"
+                        max="1000"
+                        value={priceRange[0]}
+                        onChange={(e) => {
+                          const val = Math.max(5, parseInt(e.target.value) || 5);
+                          onPriceRangeChange([val, Math.max(val, priceRange[1])]);
+                        }}
+                        className="w-1/2 px-2 py-1.5 border border-[#010526]/20 text-xs focus:outline-none focus:border-[#010526] bg-white rounded-none"
+                        placeholder="Min (£)"
+                      />
+                      <span className="text-[#010526]/40 text-xs">-</span>
+                      <input
+                        type="number"
+                        min="5"
+                        max="1000"
+                        value={priceRange[1]}
+                        onChange={(e) => {
+                          const val = Math.min(1000, parseInt(e.target.value) || 1000);
+                          onPriceRangeChange([Math.min(priceRange[0], val), val]);
+                        }}
+                        className="w-1/2 px-2 py-1.5 border border-[#010526]/20 text-xs focus:outline-none focus:border-[#010526] bg-white rounded-none"
+                        placeholder="Max (£)"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {filter.options.map((option) => {
+                      const checked = activeFilters[filter.id]?.includes(option) ?? false;
+                      return (
+                        <label
+                          key={option}
+                          className="flex items-center gap-3 cursor-pointer group"
+                          onClick={() => onToggle(filter.id, option)}
                         >
-                          {checked && (
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                          )}
-                        </span>
-                        <span
-                          className={`text-base font-medium transition-colors ${
-                            checked ? "text-[#010526]" : "text-[#010526]/70 group-hover:text-[#010526]"
-                          }`}
-                        >
-                          {option}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
+                          <span
+                            className={`w-5 h-5 border-2 flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${
+                              checked ? "bg-[#010526] border-[#010526]" : "border-[#010526]/30 group-hover:border-[#010526]"
+                            }`}
+                          >
+                            {checked && (
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            )}
+                          </span>
+                          <span
+                            className={`text-base font-medium transition-colors ${
+                              checked ? "text-[#010526]" : "text-[#010526]/70 group-hover:text-[#010526]"
+                            }`}
+                          >
+                            {option}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           );

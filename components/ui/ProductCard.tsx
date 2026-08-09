@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Loader2, Check, ShoppingBag } from "lucide-react";
+import { useCart } from "@/components/context/CartContext";
+import QuickAddModal from "@/components/product/QuickAddModal";
 
 interface ProductCardProps {
   imageSrc: string;
@@ -29,60 +31,12 @@ export default function ProductCard({
   sizes = ["S", "M", "L", "XL", "XXL"],
   slug,
 }: ProductCardProps) {
-  const [addingState, setAddingState] = useState<"idle" | "loading" | "success">("idle");
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (addingState !== "idle") return;
-
-    setAddingState("loading");
-
-    // Simulate network delay and add item to cart
-    setTimeout(() => {
-      setAddingState("success");
-
-      // 1. Get current cart items
-      const stored = localStorage.getItem("cartItems");
-      const currentCart = stored ? JSON.parse(stored) : [];
-
-      // 2. Parse price to integer
-      const numericPrice = Number(price.replace(/[^0-9]/g, "")) || 15000;
-
-      // 3. Check if exists
-      const productName = name || imageAlt || "Premium Product";
-      const existsIndex = currentCart.findIndex((item: any) => item.name === productName);
-      
-      if (existsIndex > -1) {
-        currentCart[existsIndex].quantity += 1;
-      } else {
-        currentCart.push({
-          id: Date.now(),
-          name: productName,
-          brand: brand,
-          price: numericPrice,
-          image: imageSrc,
-          size: sizes[0] || "M",
-          sizes: sizes,
-          colour: "Original",
-          quantity: 1,
-        });
-      }
-
-      // 4. Save and trigger sync
-      localStorage.setItem("cartItems", JSON.stringify(currentCart));
-      const totalCount = currentCart.reduce((sum: number, item: any) => sum + item.quantity, 0);
-      localStorage.setItem("cartItemCount", String(totalCount));
-      
-      window.dispatchEvent(new Event("cart-change"));
-
-      // 5. Open Cart Drawer after success state finishes showing (0.8s later)
-      setTimeout(() => {
-        setAddingState("idle");
-        window.dispatchEvent(new Event("cart-open-drawer"));
-      }, 800);
-
-    }, 1200);
+    setIsQuickAddOpen(true);
   };
 
   const cardContent = (
@@ -91,21 +45,10 @@ export default function ProductCard({
         {/* Add to Cart button */}
         <button
           onClick={handleAddToCart}
-          className={`absolute top-3 right-3 p-2.5 rounded-full bg-white/90 text-[#010526] z-10 transition-all duration-300 shadow-md hover:bg-white hover:scale-105 cursor-pointer ${
-            addingState !== "idle" ? "opacity-100 scale-110" : "opacity-0 group-hover:opacity-100"
-          }`}
+          className="absolute top-3 right-3 p-2.5 rounded-full bg-white/90 text-[#010526] z-10 transition-all duration-300 shadow-md hover:bg-white hover:scale-105 cursor-pointer opacity-0 group-hover:opacity-100"
           aria-label="Add to cart"
-          disabled={addingState !== "idle"}
         >
-          {addingState === "loading" && (
-            <Loader2 size={16} className="animate-spin text-[#010526]" />
-          )}
-          {addingState === "success" && (
-            <Check size={16} className="text-emerald-600 animate-fade-in" />
-          )}
-          {addingState === "idle" && (
-            <ShoppingBag size={16} className="text-[#010526]" />
-          )}
+          <ShoppingBag size={16} className="text-[#010526]" />
         </button>
 
         <img
@@ -163,11 +106,19 @@ export default function ProductCard({
 
   if (slug) {
     return (
-      <Link href={`/product/${slug}`} className="block">
-        {cardContent}
-      </Link>
+      <>
+        <Link href={`/products/${slug}`} className="block">
+          {cardContent}
+        </Link>
+        <QuickAddModal slug={slug} isOpen={isQuickAddOpen} onClose={() => setIsQuickAddOpen(false)} />
+      </>
     );
   }
 
-  return cardContent;
+  return (
+    <>
+      {cardContent}
+      {slug && <QuickAddModal slug={slug} isOpen={isQuickAddOpen} onClose={() => setIsQuickAddOpen(false)} />}
+    </>
+  );
 }

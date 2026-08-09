@@ -9,5 +9,7 @@ const API_URLS = [
 export const apiBaseUrl = API_URLS[0] ?? '';
 
 export function apiUrl(path: string): string {
-  return `${apiBaseUrl}${path}`;
+  const base = apiBaseUrl.replace(/\/$/, ''); // Remove trailing slash if any
+  const cleanPath = path.startsWith('/api') ? path.substring(4) : path;
+  return `${base}${cleanPath}`;
 }

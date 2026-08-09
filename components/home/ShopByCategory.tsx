@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { apiUrl } from "@/lib/api";
+import { resolveProductImageUrl } from "@/lib/product";
+
 interface CategoryItem {
   name: string;
   image: string;
@@ -11,24 +15,45 @@ interface ShopByCategoryProps {
   categories?: CategoryItem[];
 }
 
-const fallbackCategories: CategoryItem[] = [
-  { name: "Sarees", image: "/category/sarees.png", count: "120+ Styles", href: "#" },
-  { name: "Readymade Blouses", image: "/category/blouses2.png", count: "45+ Styles", href: "#" },
-  { name: "Jewellery", image: "/category/jewellery.png", count: "80+ Styles", href: "#" },
-  { name: "Kaftans", image: "/category/kaftan2.png", count: "30+ Styles", href: "#" },
-  { name: "Salwar Suits", image: "/category/salvar.png", count: "65+ Styles", href: "#" },
-  { name: "Kurtas", image: "/category/kurtas.png", count: "50+ Styles", href: "#" },
-  { name: "Kids' Wear", image: "/banner/kids_category.png", count: "40+ Styles", href: "#" },
-  { name: "Men's Wear", image: "/banner/men_category.png", count: "55+ Styles", href: "#" },
-];
+export default function ShopByCategory({ categories: initialCategories }: ShopByCategoryProps) {
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
 
-export default function ShopByCategory({ categories = fallbackCategories }: ShopByCategoryProps) {
+  useEffect(() => {
+    if (initialCategories && initialCategories.length > 0) {
+      setCategories(initialCategories);
+      return;
+    }
+
+    async function loadCategories() {
+      try {
+        const res = await fetch(apiUrl("/api/storefront/categories"));
+        if (res.ok) {
+          const data = await res.json();
+          const mapped = (data ?? []).map((cat: any) => ({
+            name: cat.name,
+            image: resolveProductImageUrl(cat.image_url),
+            count: cat.product_count ? `${cat.product_count} Styles` : "Explore",
+            href: `/category/${cat.slug}`,
+          }));
+          setCategories(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load categories in ShopByCategory:", err);
+      }
+    }
+    loadCategories();
+  }, [initialCategories]);
+
+  if (categories.length === 0) {
+    return null;
+  }
+
   return (
     <section className="py-12 md:py-16 px-4 md:px-8 max-w-[1600px] mx-auto bg-white">
       {/* Section Header */}
       <div className="text-center mb-12">
-        <p className="text-[10px] uppercase tracking-[0.2em] mb-2 text-[#010526]/60">Curated Collections</p>
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#010526]">Shop by Category</h2>
+        <p className="text-[10px] uppercase tracking-[0.2em] mb-2 text-[#010526]/60 font-semibold font-sans">Curated Collections</p>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#010526] font-serif uppercase">Shop by Category</h2>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
@@ -36,10 +61,10 @@ export default function ShopByCategory({ categories = fallbackCategories }: Shop
           <a
             key={cat.name}
             href={cat.href}
-            className="group flex flex-col items-center text-center"
+            className="group flex flex-col items-center text-center font-sans"
           >
             {/* Image Container (Oval) */}
-            <div className="relative w-full aspect-[3/4] overflow-hidden rounded-full bg-[#F0F2FF] shadow-sm mb-4">
+            <div className="relative w-full aspect-[3/4] overflow-hidden rounded-full bg-[#F0F2FF] shadow-sm mb-4 border border-[#010526]/5">
               <img
                 src={cat.image}
                 alt={cat.name}

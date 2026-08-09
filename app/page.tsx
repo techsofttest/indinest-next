@@ -41,9 +41,19 @@ export default async function Home() {
 
   // Map API products to the ProductCarousel format
   const heritageProducts = (productsData?.data ?? []).map((product) => {
-    const variant = product.variants?.find((v) => (v.stock ?? 0) > 0);
-    const price = variant?.price ?? product.price ?? 0;
-    const buyingPrice = variant?.buying_price ?? null;
+    const available = (product.variants ?? []).filter((v) => (v.stock ?? 0) > 0);
+    let cheapestPrice = product.price ?? 0;
+    let cheapestBuyingPrice = null;
+    if (available.length > 0) {
+      let cheapest = available[0];
+      for (const v of available) {
+        if (v.price < cheapest.price) {
+          cheapest = v;
+        }
+      }
+      cheapestPrice = cheapest.price;
+      cheapestBuyingPrice = cheapest.buying_price;
+    }
 
     return {
       id: product.id,
@@ -52,8 +62,8 @@ export default async function Home() {
       imageAlt: product.name,
       brand: product.brand?.name ?? "IndiNest",
       name: product.name,
-      price: formatPrice(price),
-      originalPrice: buyingPrice && buyingPrice > price ? formatPrice(buyingPrice) : null,
+      price: formatPrice(cheapestPrice),
+      originalPrice: cheapestBuyingPrice && cheapestBuyingPrice > cheapestPrice ? formatPrice(cheapestBuyingPrice) : null,
       sizes: product.variants
         ?.filter((v) => (v.stock ?? 0) > 0)
         .map((v) => v.name || v.size || "")

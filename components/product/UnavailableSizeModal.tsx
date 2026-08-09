@@ -184,7 +184,7 @@ export default function UnavailableSizeModal({
               {products.map((p) => (
                 <Link
                   key={p.id}
-                  href={`/product/${p.slug ? p.slug : slugify(p.name)}`}
+                  href={`/products/${p.slug ? p.slug : slugify(p.name)}`}
                   className="flex-none w-[180px] md:w-[220px] group/item"
                   onClick={onClose}
                 >

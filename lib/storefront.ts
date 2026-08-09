@@ -13,12 +13,15 @@ export async function fetchStorefront<T>(path: string): Promise<T | null> {
 
   for (const baseUrl of API_URLS) {
     try {
-      const res = await fetch(`${baseUrl}${path}`, { cache: 'no-store' });
+      const base = baseUrl.replace(/\/$/, ''); // Remove trailing slash
+      const cleanPath = path.startsWith('/api') ? path.substring(4) : path;
+      const url = `${base}${cleanPath}`;
+      const res = await fetch(url, { cache: 'no-store' });
       if (res.ok) {
         return await res.json();
       }
 
-      attemptedErrors.push(new Error(`HTTP ${res.status} from ${baseUrl}${path}`));
+      attemptedErrors.push(new Error(`HTTP ${res.status} from ${url}`));
     } catch (error) {
       attemptedErrors.push(error);
     }

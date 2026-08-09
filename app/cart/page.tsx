@@ -78,8 +78,8 @@ export default function CartPage() {
 
   const subtotal = cartTotal;
   const discountAmount = (subtotal * appliedDiscount) / 100;
-  const shipping = subtotal > 50000 || subtotal === 0 ? 0 : 150;
-  const total = subtotal - discountAmount + shipping;
+  const shipping = 0;
+  const total = subtotal - discountAmount;
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-white text-[#010526] font-serif">
@@ -137,11 +137,10 @@ export default function CartPage() {
                 >
                   {/* Image */}
                   <div className="relative w-24 h-32 md:w-32 md:h-44 flex-shrink-0 bg-[#010526]/5 overflow-hidden">
-                    <Image
+                    <img
                       src={item.image}
                       alt={item.name}
-                      fill
-                      className="object-cover object-top hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -164,54 +163,7 @@ export default function CartPage() {
 
                       {/* Attributes */}
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-sm text-[#010526]/80 font-sans">
-                        {!["S", "M", "L", "XL", "XXL"].includes(item.size ?? "") ? (
-                          <span>Size: <strong className="text-[#010526] font-bold">{item.size ?? "One Size"}</strong></span>
-                        ) : (
-                          <span className="flex items-center gap-1.5 relative">
-                            <span>Size:</span>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActiveDropdownId(activeDropdownId === item.id ? null : item.id);
-                              }}
-                              className="flex items-center gap-1 bg-transparent border border-[#010526]/20 px-2.5 py-0.5 text-xs text-[#010526] font-bold outline-none cursor-pointer hover:bg-[#010526]/5 transition-colors rounded-sm"
-                            >
-                              <span>{item.size}</span>
-                              <span className="text-[9px] text-[#010526]/60">▼</span>
-                            </button>
-
-                            {activeDropdownId === item.id && (
-                              <>
-                                <div
-                                  className="fixed inset-0 z-10"
-                                  onClick={() => setActiveDropdownId(null)}
-                                />
-                                <div className="absolute top-full left-0 mt-1 bg-white border border-[#010526]/20 shadow-lg rounded-sm py-1 z-20 min-w-[70px]">
-                                  {["S", "M", "L", "XL", "XXL"].map((sz) => {
-                                    const isAvailable = !item.sizes || item.sizes.includes(sz);
-                                    return (
-                                      <button
-                                        key={sz}
-                                        disabled={!isAvailable}
-                                        onClick={() => {
-                                          updateSize(item.id, sz);
-                                          setActiveDropdownId(null);
-                                        }}
-                                        className={`w-full text-left px-3 py-1.5 text-xs font-bold transition-colors ${
-                                          isAvailable
-                                            ? "text-[#010526] hover:bg-[#010526]/5"
-                                            : "line-through text-[#010526]/30 cursor-not-allowed bg-[#010526]/[0.02]"
-                                        }`}
-                                      >
-                                        {sz}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              </>
-                            )}
-                          </span>
-                        )}
+                        <span>Size: <strong className="text-[#010526] font-bold">{item.size ?? "One Size"}</strong></span>
                         <span className="border-l border-[#010526]/10 pl-4">Color: <strong className="text-[#010526] font-bold">{item.colour}</strong></span>
                       </div>
                       {(item.isOutOfStock || item.name === "Banarasi Silk Saree") && (
@@ -237,7 +189,8 @@ export default function CartPage() {
                         </span>
                         <button
                           onClick={() => updateQuantity(item.id, 1)}
-                          className="px-3 py-2 text-[#010526]/90 hover:text-[#010526] transition-colors cursor-pointer"
+                          disabled={item.quantity >= (item.stock ?? 99)}
+                          className="px-3 py-2 text-[#010526]/90 hover:text-[#010526] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                           aria-label="Increase quantity"
                         >
                           <Plus size={16} />
@@ -279,11 +232,9 @@ export default function CartPage() {
                   </div>
                 )}
 
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center text-xs text-[#010526]/60">
                   <span>Shipping</span>
-                  <span className="font-semibold text-[#010526]">
-                    {shipping === 0 ? "Free" : `£${shipping}`}
-                  </span>
+                  <span>Calculated at checkout</span>
                 </div>
 
                 <div className="border-t border-[#010526]/10 pt-4 mt-2 flex justify-between text-base md:text-lg font-serif text-[#010526]">
