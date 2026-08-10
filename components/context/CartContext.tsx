@@ -176,18 +176,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadCart();
 
-    const handleCartChange = () => syncCartFromLocalStorage();
+    // Only listen to the native `storage` event (fired by OTHER tabs/windows)
+    // Do NOT listen to the custom `cart-change` event here — persistCart() dispatches
+    // it and this provider also calls syncCartFromLocalStorage() which calls persistCart()
+    // again, creating an infinite loop.
     const handleStorage = (event: StorageEvent) => {
       if (event.key === "cartItems" || event.key === "cartItemCount") {
         syncCartFromLocalStorage();
       }
     };
 
-    window.addEventListener("cart-change", handleCartChange);
     window.addEventListener("storage", handleStorage);
 
     return () => {
-      window.removeEventListener("cart-change", handleCartChange);
       window.removeEventListener("storage", handleStorage);
     };
   }, []);

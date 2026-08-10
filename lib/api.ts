@@ -1,15 +1,11 @@
-const API_URLS = [
-  process.env.NEXT_PUBLIC_API_URL,
-  process.env.NEXT_PUBLIC_API_BASE_URL,
-  'http://indinest.test',
-  'http://localhost',
-  'http://127.0.0.1',
-].filter(Boolean) as string[];
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
 
-export const apiBaseUrl = API_URLS[0] ?? '';
+export const apiBaseUrl = API_BASE.replace(/\/$/, '');
 
 export function apiUrl(path: string): string {
-  const base = apiBaseUrl.replace(/\/$/, ''); // Remove trailing slash if any
-  const cleanPath = path.startsWith('/api') ? path.substring(4) : path;
-  return `${base}${cleanPath}`;
+  const base = apiBaseUrl;
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  // Ensure path starts with /api
+  const apiPath = cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
+  return `${base}${apiPath}`;
 }

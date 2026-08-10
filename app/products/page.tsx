@@ -24,8 +24,10 @@ const sortOptions = [
 
 export default function AllProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [categories, setCategories] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
   const [priceRange, setPriceRange] = useState<[number, number]>([5, 1000]);
@@ -44,113 +46,110 @@ export default function AllProductsPage() {
   const hasMovedCategories = useRef(false);
   const [draggingCategories, setDraggingCategories] = useState(false);
 
+  // ── One-time load: categories + master filter options ──────────────────
   useEffect(() => {
-    async function loadData() {
+    async function loadStatic() {
       try {
-        const [prodRes, catRes, masterRes] = await Promise.all([
-          fetch(apiUrl('/api/storefront/products?per_page=48')),
+        const [catRes, masterRes] = await Promise.all([
           fetch(apiUrl('/api/storefront/categories')),
-          fetch(apiUrl('/api/storefront/master-filters')).catch(() => null)
+          fetch(apiUrl('/api/storefront/master-filters')).catch(() => null),
         ]);
 
-        let masterFilters = { occasions: [], fabrics: [], colors: [], brands: [] };
+        let masterFilters: Record<string, string[]> = { occasions: [], fabrics: [], colors: [], brands: [] };
         if (masterRes && masterRes.ok) {
-          try {
-            masterFilters = await masterRes.json();
-          } catch (e) {
-            console.error("Failed to parse master filters:", e);
-          }
+          masterFilters = await masterRes.json().catch(() => masterFilters);
         }
 
-        if (prodRes.ok) {
-          const prodJson = await prodRes.json();
-          const mappedProds = (prodJson.data ?? []).map((product: any) => {
-            const available = (product.variants ?? []).filter((v: any) => (v.stock ?? 0) > 0);
-            let cheapestPrice = product.price ?? 0;
-            let cheapestBuyingPrice = null;
-            if (available.length > 0) {
-              let cheapest = available[0];
-              for (const v of available) {
-                if (v.price < cheapest.price) {
-                  cheapest = v;
-                }
-              }
-              cheapestPrice = cheapest.price;
-              cheapestBuyingPrice = cheapest.buying_price;
-            }
-
-            return {
-              id: product.id,
-              slug: product.slug,
-              image: resolveProductImageUrl(product.featured_image),
-              name: product.name,
-              brand: product.brand?.name ?? "IndiNest",
-              category: product.category?.slug ?? "",
-              price: formatPrice(cheapestPrice),
-              originalPrice: cheapestBuyingPrice && cheapestBuyingPrice > cheapestPrice ? formatPrice(cheapestBuyingPrice) : null,
-              fabric: product.fabric?.name ?? "",
-              colour: product.color?.name ?? "",
-              occasion: product.occasion?.name ?? "",
-              sizes: product.variants
-                ?.filter((v: any) => (v.stock ?? 0) > 0)
-                .map((v: any) => v.name || v.size || "")
-                .filter(Boolean),
-            };
-          });
-          setProducts(mappedProds);
-
-          // Populate filter panel options from master data
-          const dynamicConfig = [
-            {
-              id: "occasion",
-              label: "Occasion",
-              options: masterFilters.occasions.length ? masterFilters.occasions : Array.from(new Set(mappedProds.map((p: any) => p.occasion).filter(Boolean))),
-            },
-            {
-              id: "fabric",
-              label: "Fabric",
-              options: masterFilters.fabrics.length ? masterFilters.fabrics : Array.from(new Set(mappedProds.map((p: any) => p.fabric).filter(Boolean))),
-            },
-            {
-              id: "colour",
-              label: "Color",
-              options: masterFilters.colors.length ? masterFilters.colors : Array.from(new Set(mappedProds.map((p: any) => p.colour).filter(Boolean))),
-            },
-            {
-              id: "brand",
-              label: "Brand",
-              options: masterFilters.brands.length ? masterFilters.brands : Array.from(new Set(mappedProds.map((p: any) => p.brand).filter(Boolean))),
-            },
-            {
-              id: "price",
-              label: "Price",
-              options: [],
-            },
-          ];
-
-          setFilterConfig(dynamicConfig);
-        }
+        setFilterConfig([
+          { id: "occasion", label: "Occasion", options: masterFilters.occasions ?? [] },
+          { id: "fabric",   label: "Fabric",   options: masterFilters.fabrics ?? [] },
+          { id: "colour",   label: "Color",    options: masterFilters.colors ?? [] },
+          { id: "brand",    label: "Brand",    options: masterFilters.brands ?? [] },
+          { id: "price",    label: "Price",    options: [] },
+        ]);
 
         if (catRes.ok) {
           const catJson = await catRes.json();
-          const mappedCats = [
+          setCategories([
             { name: "All", slug: "all", image: "/products/product-clt/Saree-red.png" },
             ...(catJson ?? []).map((cat: any) => ({
               name: cat.name,
               slug: cat.slug,
               image: resolveProductImageUrl(cat.image_url),
-            }))
-          ];
-          setCategories(mappedCats);
+            })),
+          ]);
         }
-      } catch (error) {
-        console.error("Failed to load products/categories:", error);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Failed to load static data:", err);
       }
     }
-    loadData();
+    loadStatic();
   }, []);
+
+  // ── Fetch products from API whenever filters/category/sort change ───────
+  useEffect(() => {
+    async function fetchProducts() {
+      setProductsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        params.set('per_page', '48');
+
+        if (activeCategory !== 'all') params.set('category', activeCategory);
+
+        if (activeFilters.colour?.length)   params.set('colour',   activeFilters.colour.join(','));
+        if (activeFilters.fabric?.length)   params.set('fabric',   activeFilters.fabric.join(','));
+        if (activeFilters.occasion?.length) params.set('occasion', activeFilters.occasion.join(','));
+        if (activeFilters.brand?.length)    params.set('brand_name', activeFilters.brand.join(','));
+
+        const sortMap: Record<SortOption, string> = {
+          featured:   'featured',
+          'price-asc':  'price_low',
+          'price-desc': 'price_high',
+          newest:     'latest',
+        };
+        params.set('sort', sortMap[sort] ?? 'latest');
+
+        const res = await fetch(apiUrl(`/api/storefront/products?${params.toString()}`));
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = await res.json();
+        const mapped = (json.data ?? []).map((p: any) => {
+          const inStock = (p.variants ?? []).filter((v: any) => (v.stock ?? 0) > 0);
+          let price = p.price ?? 0;
+          let buyingPrice = null;
+          if (inStock.length > 0) {
+            const cheapest = inStock.reduce((a: any, b: any) => b.price < a.price ? b : a, inStock[0]);
+            price = cheapest.price;
+            buyingPrice = cheapest.buying_price;
+          }
+          return {
+            id: p.id,
+            slug: p.slug,
+            image: resolveProductImageUrl(p.featured_image),
+            name: p.name,
+            brand: p.brand?.name ?? "",
+            price: formatPrice(price),
+            originalPrice: buyingPrice && buyingPrice > price ? formatPrice(buyingPrice) : null,
+          };
+        });
+
+        // Client-side price filter (API doesn't support price range yet)
+        const priceFiltered = mapped.filter((p: any) => {
+          const n = parsePrice(p.price);
+          return n >= priceRange[0] && n <= priceRange[1];
+        });
+
+        setProducts(priceFiltered);
+        setTotalProducts(priceFiltered.length);
+      } catch (err) {
+        console.error("Failed to fetch products:", err);
+      } finally {
+        setProductsLoading(false);
+        setInitialLoading(false);
+      }
+    }
+    fetchProducts();
+  }, [activeCategory, activeFilters, sort, priceRange]);
 
   const applyMomentumCategories = () => {
     if (!categoriesTrackRef.current) return;
@@ -243,23 +242,8 @@ export default function AllProductsPage() {
     setPriceRange([5, 1000]);
   };
 
-  let filtered = products.filter((p) => {
-    if (activeCategory !== "all" && p.category !== activeCategory) return false;
-    if (activeFilters.occasion?.length && !activeFilters.occasion.includes(p.occasion)) return false;
-    if (activeFilters.fabric?.length && !activeFilters.fabric.includes(p.fabric)) return false;
-    if (activeFilters.colour?.length && !activeFilters.colour.includes(p.colour)) return false;
-    if (activeFilters.brand?.length && !activeFilters.brand.includes(p.brand)) return false;
-
-    // Filter by price range slider
-    const numericPrice = parsePrice(p.price);
-    if (numericPrice < priceRange[0] || numericPrice > priceRange[1]) return false;
-
-    return true;
-  });
-
-  if (sort === "price-asc") filtered = [...filtered].sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
-  if (sort === "price-desc") filtered = [...filtered].sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
-
+  const filtered = products; // Already filtered server-side
+  const loading = initialLoading;
   if (loading) {
     return (
       <>
@@ -372,7 +356,7 @@ export default function AllProductsPage() {
                 <span className="font-bold text-[#010526] mr-2">
                   {(categories.find((c) => c.slug === activeCategory)?.name || "All")}
                 </span>
-                ({filtered.length} {filtered.length === 1 ? "product" : "products"})
+                ({productsLoading ? "..." : `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`})
               </span>
               <div className="flex items-center gap-4">
                 <button
@@ -402,27 +386,34 @@ export default function AllProductsPage() {
             </div>
 
             {/* Grid */}
-            {filtered.length === 0 ? (
-              <div className="text-center py-20 border border-[#010526]/10 font-sans">
-                <p className="text-lg font-semibold text-[#010526]">No products found</p>
-                <p className="text-sm text-[#010526]/60 mt-1">Try adjusting your filter options</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-10 md:gap-x-6 md:gap-y-12">
-                {filtered.map((product) => (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id.toString()}
-                    slug={product.slug}
-                    brand={product.brand}
-                    title={product.name}
-                    image={product.image}
-                    price={product.price}
-                    originalPrice={product.originalPrice}
-                  />
-                ))}
-              </div>
-            )}
+            <div className="relative">
+              {productsLoading && (
+                <div className="absolute inset-0 bg-white/70 z-10 flex items-center justify-center min-h-[200px]">
+                  <div className="w-8 h-8 border-2 border-[#010526]/20 border-t-[#010526] rounded-full animate-spin" />
+                </div>
+              )}
+              {!productsLoading && filtered.length === 0 ? (
+                <div className="text-center py-20 border border-[#010526]/10 font-sans">
+                  <p className="text-lg font-semibold text-[#010526]">No products found</p>
+                  <p className="text-sm text-[#010526]/60 mt-1">Try adjusting your filter options</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-10 md:gap-x-6 md:gap-y-12">
+                  {filtered.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id.toString()}
+                      slug={product.slug}
+                      brand={product.brand}
+                      title={product.name}
+                      image={product.image}
+                      price={product.price}
+                      originalPrice={product.originalPrice}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
