@@ -402,13 +402,13 @@ export default function AllProductsPage() {
                   {filtered.map((product) => (
                     <ProductCard
                       key={product.id}
-                      id={product.id.toString()}
-                      slug={product.slug}
+                      name={product.name}
                       brand={product.brand}
-                      title={product.name}
-                      image={product.image}
                       price={product.price}
                       originalPrice={product.originalPrice}
+                      imageSrc={product.image}
+                      imageAlt={product.name}
+                      slug={product.slug}
                     />
                   ))}
                 </div>

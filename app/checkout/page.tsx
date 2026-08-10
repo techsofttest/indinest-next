@@ -118,7 +118,7 @@ function CheckoutContent() {
           realProductId = item.id;
         }
 
-        let realVariantId: any = item.variant_id || item.variantId;
+        let realVariantId: any = item.variant_id;
         if (!realVariantId && typeof item.id === "string") {
           const parts = item.id.split("-");
           if (parts.length > 1) {

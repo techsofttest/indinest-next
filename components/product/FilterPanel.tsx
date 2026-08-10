@@ -24,11 +24,11 @@ export default function FilterPanel({
   onPriceRangeChange,
 }: FilterPanelProps) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    price: true,
-    occasion: true,
-    fabric: true,
-    colour: true,
-    brand: true,
+    price: false,
+    occasion: false,
+    fabric: false,
+    colour: false,
+    brand: false,
   });
 
   const toggleSection = (id: string) => {
