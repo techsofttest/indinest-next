@@ -16,6 +16,7 @@ export interface Product {
   packContains?: string;
   manufacturedBy?: string;
   speciality?: string;
+  keyFeatures?: string;
   styleFitTips?: string | null;
   shippingReturns?: string | null;
   faq?: string | null;

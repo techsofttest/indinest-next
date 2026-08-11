@@ -236,30 +236,31 @@ export default function ProductInfoPanel({
 
       {/* Accordion Sections */}
       <div className="border-t border-[#010526]/10 mt-2">
-        {(product.styleNo || product.designNo || product.colour || product.fabric || product.packContains || product.manufacturedBy || product.speciality) && (
+        {product.speciality && (
           <AccordionItem
             id="details"
             label="Product Details"
             isOpen={openAccordions.details}
             toggle={() => toggleAccordion("details")}
           >
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-5">
-              {product.styleNo && <InfoRow label="Style No" value={product.styleNo} />}
-              {product.designNo && <InfoRow label="Design No" value={product.designNo} />}
-              {product.colour && <InfoRow label="Color" value={product.colour} />}
-              {product.fabric && <InfoRow label="Fabric" value={product.fabric} />}
-              {product.packContains && <InfoRow label="Pack Contains" value={product.packContains} />}
-              {product.manufacturedBy && <InfoRow label="Manufactured / Packed by" value={product.manufacturedBy} />}
-            </div>
-            {product.speciality && (
-              <>
-                <p className="font-bold text-[#010526]/80 mb-2">Product Speciality :</p>
-                <div 
-                  className="leading-relaxed text-[#010526]/80 font-light rich-content"
-                  dangerouslySetInnerHTML={{ __html: product.speciality }}
-                />
-              </>
-            )}
+            <div 
+              className="leading-relaxed text-[#010526]/80 font-light rich-content"
+              dangerouslySetInnerHTML={{ __html: product.speciality }}
+            />
+          </AccordionItem>
+        )}
+
+        {product.keyFeatures && (
+          <AccordionItem
+            id="features"
+            label="Features"
+            isOpen={openAccordions.features}
+            toggle={() => toggleAccordion("features")}
+          >
+            <div 
+              className="leading-relaxed text-[#010526]/80 font-light rich-content"
+              dangerouslySetInnerHTML={{ __html: product.keyFeatures }}
+            />
           </AccordionItem>
         )}
         {product.styleFitTips && (

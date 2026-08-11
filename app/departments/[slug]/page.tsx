@@ -243,7 +243,7 @@ export default function DepartmentDetailPage({
         {/* Header Section */}
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 pt-8 pb-4 text-center">
           <h1 className="text-4xl md:text-5xl font-light uppercase tracking-wider text-[#010526]">
-            {department?.name ?? "Department"} Collection
+            {department?.name ?? "Department"}
           </h1>
           {department?.description && (
             <p className="text-sm font-sans text-[#010526]/60 mt-3 max-w-xl mx-auto leading-relaxed">

@@ -18,42 +18,7 @@ export const leftLinks = [
 ];
 
 // Right-side nav links
-export const rightLinks = [
-  { label: "Blog", href: "/blog" },
-];
-
-const categories = [
-  { label: "Sarees", href: "#" },
-  { label: "Lehengas", href: "#" },
-  { label: "Salwar Suits", href: "#" },
-  { label: "Silk Weaves", href: "#" },
-  { label: "Designer Jewellery", href: "#" },
-];
-
-export const drawerCategories = [
-  { name: "Sarees", image: "/category/sarees.png", href: "#" },
-  { name: "Readymade Blouses", image: "/category/blouses2.png", href: "#" },
-  { name: "Jewellery", image: "/category/jewellery.png", href: "#" },
-  { name: "Kaftans", image: "/category/kaftan2.png", href: "#" },
-  { name: "Salwar Suits", image: "/category/salvar.png", href: "#" },
-  { name: "Kurtas", image: "/category/kurtas.png", href: "#" },
-  { name: "Kids' Wear", image: "/banner/kids_category.png", href: "#" },
-  { name: "Men's Wear", image: "/banner/men_category.png", href: "#" },
-];
-
-export const keralaTraditionalItems = [
-  { label: "Kerala Saree", href: "#" },
-  { label: "120 Mul Cotton Saree", href: "#" },
-  { label: "Premium Silk Sarees", href: "#" },
-  { label: "Party Wear Sarees", href: "#" },
-  { label: "Readymade Blouse", href: "#" },
-  { label: "Jewellery", href: "#" },
-  { label: "Kaftan", href: "#" },
-  { label: "Salwar", href: "#" },
-  { label: "Kurta", href: "#" },
-  { label: "Co-ord Set", href: "#" },
-  { label: "Dhavani Set", href: "#" },
-];
+export const rightLinks: Array<{ label: string; href: string }> = [];
 
 const getInitials = (name: string): string => {
   if (!name) return "?";
@@ -67,7 +32,7 @@ const getInitials = (name: string): string => {
 export default function Header() {
   const pathname = usePathname();
   const [leftLinksState, setLeftLinksState] = useState(leftLinks);
-  const [rightLinksState, setRightLinksState] = useState(rightLinks);
+  const [rightLinksState, setRightLinksState] = useState<Array<{ label: string; href: string }>>(rightLinks);
   const [departments, setDepartments] = useState<any[]>([]);
   const [revealed, setRevealed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -77,9 +42,9 @@ export default function Header() {
   useEffect(() => {
     async function loadHeaderData() {
       try {
-        const [deptRes, catRes] = await Promise.all([
+        const [deptRes, headerRes] = await Promise.all([
           fetch(apiUrl('/api/storefront/departments')),
-          fetch(apiUrl('/api/storefront/categories'))
+          fetch(apiUrl('/api/storefront/header'))
         ]);
         
         let depts = [];
@@ -88,27 +53,25 @@ export default function Header() {
           setDepartments(depts ?? []);
         }
         
-        let cats = [];
-        if (catRes.ok) {
-          cats = await catRes.json();
-          setCategoriesState(cats ?? []);
+        let homeFeaturedCats = [];
+        if (headerRes.ok) {
+          const headerData = await headerRes.json();
+          homeFeaturedCats = headerData.home_featured_categories ?? [];
+          setCategoriesState(headerData.categories ?? []);
         }
-
-        const featuredCats = (cats ?? []).filter((c: any) => c.home_featured);
 
         setLeftLinksState([
           { label: "All Products", href: "/products" },
-          ...featuredCats.map((cat: any) => ({
+          ...homeFeaturedCats.map((cat: any) => ({
             label: cat.name,
-            href: `/category/${cat.slug}`
+            href: cat.href || `/category/${cat.slug}`
           }))
         ]);
         setRightLinksState([
           ...(depts ?? []).map((dept: any) => ({
             label: dept.name,
             href: `/departments/${dept.slug}`
-          })),
-          { label: "Blog", href: "/blog" }
+          }))
         ]);
       } catch (err) {
         console.error("Failed to load header data:", err);

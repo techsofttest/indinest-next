@@ -65,7 +65,7 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
       price: variant.price ?? product.price ?? 0,
       quantity: 1,
       size: variant.name || variant.size || "One Size",
-      colour: "Standard",
+      colour: product.colour || "Standard",
       variant_name: variant.name || variant.size || null,
       stock: variant.stock ?? 99,
     });

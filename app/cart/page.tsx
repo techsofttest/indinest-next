@@ -6,20 +6,7 @@ import Link from "next/link";
 import { Plus, Minus, Trash2, ShieldCheck, ArrowRight, ShoppingBag, Percent, AlertTriangle } from "lucide-react";
 import Header from "@/components/global/Header";
 import Footer from "@/components/global/Footer";
-import { useCart } from "@/components/context/CartContext";
-
-interface CartItem {
-  id: string;
-  name: string;
-  brand: string;
-  price: number;
-  image: string;
-  size: string;
-  sizes?: string[];
-  colour: string;
-  quantity: number;
-  isOutOfStock?: boolean;
-}
+import { useCart, CartItem } from "@/components/context/CartContext";
 
 export default function CartPage() {
   const { cartItems, cartTotal, cartCount, updateCartItem, removeFromCart, clearCart } = useCart();
@@ -49,7 +36,8 @@ export default function CartPage() {
   const updateQuantity = (id: string, delta: number) => {
     const item = cartItems.find((item) => item.id === id);
     if (!item) return;
-    const nextQuantity = Math.max(1, item.quantity + delta);
+    const maxStock = item.stock ?? 99;
+    const nextQuantity = Math.max(1, Math.min(item.quantity + delta, maxStock));
     updateCartItem(id, { quantity: nextQuantity });
   };
 

@@ -41,6 +41,7 @@ export default function ProductDetailPage({
   const [isAddedToBag, setIsAddedToBag] = useState(false);
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
     details: true,
+    features: false,
     styleFit: false,
     shippingReturns: false,
     faqs: false,
@@ -138,7 +139,7 @@ export default function ProductDetailPage({
       price: numericPrice,
       quantity: 1,
       size: selectedVariantName || selectedVariant?.name || selectedVariant?.size || "One Size",
-      colour: "Standard",
+      colour: product.colour || "Standard",
       variant_name: selectedVariant?.name || selectedVariant?.size || null,
       stock: selectedVariant?.stock ?? 99,
     });
@@ -163,7 +164,7 @@ export default function ProductDetailPage({
       price: numericPrice,
       quantity: 1,
       size: selectedVariantName || selectedVariant?.name || selectedVariant?.size || "One Size",
-      colour: "Standard",
+      colour: product.colour || "Standard",
       variant_name: selectedVariant?.name || selectedVariant?.size || null,
       stock: selectedVariant?.stock ?? 99,
     });
@@ -175,7 +176,7 @@ export default function ProductDetailPage({
     window.scrollTo({ top: 0, behavior: "smooth" });
     setActiveImageIndex(0);
     setIsAddedToBag(false);
-    setOpenAccordions({ details: true, styleFit: false, shippingReturns: false, faqs: false });
+    setOpenAccordions({ details: true, features: false, styleFit: false, shippingReturns: false, faqs: false });
   }, [productSlug]);
 
   useEffect(() => {
@@ -295,6 +296,7 @@ export default function ProductDetailPage({
     packContains: "",
     manufacturedBy: "",
     speciality: product.description ?? "",
+    keyFeatures: product.key_features ?? "",
     demand: 0,
     availability: "In Stock",
   };

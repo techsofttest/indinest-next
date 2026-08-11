@@ -3,24 +3,33 @@
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import Image from "next/image";
+import Link from "next/link";
 import { apiUrl } from "@/lib/api";
 
 export default function Footer() {
   const [categories, setCategories] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
 
   useEffect(() => {
-    async function loadFooterCategories() {
+    async function loadFooterData() {
       try {
-        const res = await fetch(apiUrl("/api/storefront/categories"));
-        if (res.ok) {
-          const data = await res.json();
+        const [catRes, deptRes] = await Promise.all([
+          fetch(apiUrl("/api/storefront/categories")),
+          fetch(apiUrl("/api/storefront/departments"))
+        ]);
+        if (catRes.ok) {
+          const data = await catRes.json();
           setCategories(data ?? []);
         }
+        if (deptRes.ok) {
+          const deptData = await deptRes.json();
+          setDepartments(deptData ?? []);
+        }
       } catch (err) {
-        console.error("Failed to load categories in Footer:", err);
+        console.error("Failed to load footer data:", err);
       }
     }
-    loadFooterCategories();
+    loadFooterData();
   }, []);
 
   return (
@@ -79,9 +88,11 @@ export default function Footer() {
           <h2 className="text-3xl md:text-4xl italic text-[#010526] mb-6" style={{ fontFamily: "var(--font-pt-serif)" }}>
             Experience Luxury Indian Heritage
           </h2>
-          <Button variant="primary" size="md" className="px-10">
-            Explore Collection
-          </Button>
+          <Link href="/products">
+            <Button variant="primary" size="md" className="px-10">
+              Explore All Products
+            </Button>
+          </Link>
         </div>
 
         {/* Right Side Tree 1 (Large, aligned to bottom edge, mirrored) */}
@@ -234,27 +245,24 @@ export default function Footer() {
       {/* Links Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16 text-sm">
         <div className="flex flex-col gap-3">
-          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Customer Service</h5>
+          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Quick Links</h5>
+          <a href="/about" className="text-[#010526]/70 hover:text-[#010526]">About Us</a>
           <a href="/contact" className="text-[#010526]/70 hover:text-[#010526]">Contact Us</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Gift Card &amp; Store Credit</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Payment</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Shipping</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Returns &amp; Exchanges</a>
+
         </div>
+
+        
         <div className="flex flex-col gap-3">
-          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">About Us</h5>
-          <a href="/about" className="text-[#010526]/70 hover:text-[#010526]">Our Story</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Sustainability</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Press &amp; Events</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Careers</a>
+          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Departments</h5>
+          {departments.map((dept: any) => (
+            <a key={dept.id} href={`/departments/${dept.slug}`} className="text-[#010526]/70 hover:text-[#010526]">
+              {dept.name}
+            </a>
+          ))}
         </div>
-        <div className="flex flex-col gap-3">
-          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Legal</h5>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Terms of Use</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Privacy Policy</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Imprint</a>
-        </div>
-        <div className="flex flex-col gap-3">
+
+
+      <div className="flex flex-col gap-3">
           <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Categories</h5>
           {categories.slice(0, 8).map((cat: any) => (
             <a key={cat.id} href={`/category/${cat.slug}`} className="text-[#010526]/70 hover:text-[#010526]">
@@ -262,6 +270,18 @@ export default function Footer() {
             </a>
           ))}
         </div>
+
+        <div className="flex flex-col gap-3">
+          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Legal</h5>
+          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Terms of Use</a>
+          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Privacy Policy</a>
+          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Shipping Policy</a>
+          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Return Policy</a>
+        </div>
+
+        
+
+
       </div>
 
       {/* Copyright */}

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
     LayoutDashboard,
     ShoppingBag,
@@ -17,7 +18,6 @@ export type ProfileTab =
 
 interface ProfileSidebarProps {
     activeTab: ProfileTab;
-    onSelectTab: (tab: ProfileTab) => void;
     onLogout: () => void;
 }
 
@@ -34,9 +34,15 @@ const navItems: NavItem[] = [
     { id: "addresses",         label: "Addresses",        icon: MapPin },
 ];
 
+const tabRoutes: Record<ProfileTab, string> = {
+    "overview": "/profile",
+    "orders": "/profile/orders",
+    "personal-details": "/profile/details",
+    "addresses": "/profile/addresses",
+};
+
 export default function ProfileSidebar({
     activeTab,
-    onSelectTab,
     onLogout,
 }: ProfileSidebarProps) {
     return (
@@ -45,11 +51,11 @@ export default function ProfileSidebar({
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.id;
+                    const href = tabRoutes[item.id];
                     return (
-                        <button
+                        <Link
                             key={item.id}
-                            type="button"
-                            onClick={() => onSelectTab(item.id)}
+                            href={href}
                             className={`w-full text-left flex items-center gap-3 px-3 py-2.5 text-[15px] tracking-wide transition-all duration-150 ${
                                 isActive
                                     ? "font-semibold text-[#010526] bg-[#010526]/[0.06]"
@@ -61,7 +67,7 @@ export default function ProfileSidebar({
                                 className={isActive ? "text-[#010526]" : "text-[#010526]/50"}
                             />
                             {item.label}
-                        </button>
+                        </Link>
                     );
                 })}
 
@@ -69,7 +75,7 @@ export default function ProfileSidebar({
                     <button
                         type="button"
                         onClick={onLogout}
-                        className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-[15px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors"
+                        className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-[15px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
                     >
                         <LogOut size={15} />
                         Sign Out
