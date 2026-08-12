@@ -59,7 +59,7 @@ function CheckoutContent() {
     city: "",
     state: "",
     postcode: "",
-    country: "United Kingdom",
+    country: "GB",
     delivery_notes: "",
   });
 
@@ -73,6 +73,14 @@ function CheckoutContent() {
       setSelectedShippingMethod("");
     }
     return resolvedType;
+  };
+
+  // Resolves a saved address country (name or code) to the country code used by the <select>
+  const resolveCountryCode = (countryVal: string, countriesList: any[] = countries): string => {
+    const found = countriesList.find(
+      (c) => c.code === countryVal || c.name === countryVal
+    );
+    return found?.code ?? countryVal;
   };
 
   useEffect(() => {
@@ -129,7 +137,7 @@ function CheckoutContent() {
       const userEmail = localStorage.getItem("userEmail") || "";
       setIsLoggedIn(!!token);
 
-      let initialCountry = "United Kingdom";
+      let initialCountry = "GB"; // default to United Kingdom code
       if (userEmail) {
         setAddressForm(prev => ({ ...prev, email: userEmail }));
       }
@@ -148,7 +156,12 @@ function CheckoutContent() {
             const defaultAddr = data.find((addr: any) => addr.is_default_shipping);
             if (defaultAddr) {
               setSelectedAddressId(String(defaultAddr.id));
-              initialCountry = defaultAddr.country || "United Kingdom";
+              // Resolve saved country (may be name or code) to the code used by <select>
+              const savedCountry = defaultAddr.country || "United Kingdom";
+              const resolvedCode = loadedCountries.find(
+                (c: any) => c.code === savedCountry || c.name === savedCountry
+              )?.code ?? savedCountry;
+              initialCountry = resolvedCode;
               setAddressForm({
                 contact_name: defaultAddr.contact_name,
                 phone: defaultAddr.phone,
@@ -159,7 +172,7 @@ function CheckoutContent() {
                 city: defaultAddr.city,
                 state: defaultAddr.state || "",
                 postcode: defaultAddr.postcode,
-                country: initialCountry,
+                country: resolvedCode,
                 delivery_notes: defaultAddr.delivery_notes || "",
               });
             }
@@ -195,10 +208,10 @@ function CheckoutContent() {
           city: "",
           state: "",
           postcode: "",
-          country: "United Kingdom",
+          country: "GB",
           delivery_notes: "",
         });
-        setCheckoutType("payment");
+        updateCheckoutPaymentMethod("GB");
         setSelectedShippingMethod("");
       }
     };
@@ -225,14 +238,16 @@ function CheckoutContent() {
         city: "",
         state: "",
         postcode: "",
-        country: "United Kingdom",
+        country: "GB",
         delivery_notes: "",
       });
-      updateCheckoutPaymentMethod("United Kingdom");
+      updateCheckoutPaymentMethod("GB");
     } else {
       const selected = savedAddresses.find((addr) => String(addr.id) === id);
       if (selected) {
-        const countryVal = selected.country || "United Kingdom";
+        const savedCountry = selected.country || "United Kingdom";
+        // Resolve saved country (may be name or code) to the code used by <select>
+        const resolvedCode = resolveCountryCode(savedCountry);
         setAddressForm({
           contact_name: selected.contact_name,
           phone: selected.phone,
@@ -243,10 +258,10 @@ function CheckoutContent() {
           city: selected.city,
           state: selected.state || "",
           postcode: selected.postcode,
-          country: countryVal,
+          country: resolvedCode,
           delivery_notes: selected.delivery_notes || "",
         });
-        updateCheckoutPaymentMethod(countryVal);
+        updateCheckoutPaymentMethod(resolvedCode);
       }
     }
   };
