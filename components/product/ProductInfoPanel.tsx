@@ -1,6 +1,7 @@
 "use client";
 
 import type { Product } from "@/components/data/products";
+import { Heart } from "lucide-react";
 
 // Helper – compute delivery date 5 days from now
 const getDeliveryDate = () => {
@@ -27,6 +28,8 @@ interface ProductInfoPanelProps {
   openAccordions: Record<string, boolean>;
   toggleAccordion: (key: string) => void;
   actionButtonsRef: React.RefObject<HTMLDivElement | null>;
+  isWishlisted?: boolean;
+  onToggleWishlist?: () => void;
 }
 
 export default function ProductInfoPanel({
@@ -42,6 +45,8 @@ export default function ProductInfoPanel({
   openAccordions,
   toggleAccordion,
   actionButtonsRef,
+  isWishlisted = false,
+  onToggleWishlist,
 }: ProductInfoPanelProps) {
   const isAvailable = product.availability === "In Stock";
 
@@ -161,12 +166,23 @@ export default function ProductInfoPanel({
         </button>
         <button
           onClick={onBuyNow}
-          className="group px-8 py-4 bg-[#010526] text-white text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2.5"
+          className="group px-8 py-4 bg-[#010526] text-white text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2.5 flex-1"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-breathe transition-transform duration-300 ease-in-out group-hover:translate-x-1 group-hover:scale-105 group-hover:animate-none">
             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
           </svg>
           Buy Now
+        </button>
+        <button
+          onClick={onToggleWishlist}
+          className={`px-5 py-4 border-2 transition-all duration-300 flex items-center justify-center ${
+            isWishlisted
+              ? "bg-red-50 border-red-500 text-red-500"
+              : "border-[#010526]/20 hover:border-[#010526] text-[#010526]"
+          }`}
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart size={18} className={isWishlisted ? "fill-current text-red-500" : ""} />
         </button>
       </div>
 

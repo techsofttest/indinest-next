@@ -146,7 +146,7 @@ export default function HeritageCarousel({
         </div>
         {showSeeAll && (
           <Button
-            href="#"
+            href="/products"
             variant="secondary"
             size="sm"
             className="whitespace-nowrap"

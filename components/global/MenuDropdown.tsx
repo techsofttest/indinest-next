@@ -8,9 +8,17 @@ interface MenuDropdownProps {
   isOpen: boolean;
   onClose: () => void;
   departments: any[];
+  leftLinks?: Array<{ label: string; href: string }>;
+  rightLinks?: Array<{ label: string; href: string }>;
 }
 
-export default function MenuDropdown({ isOpen, onClose, departments = [] }: MenuDropdownProps) {
+export default function MenuDropdown({
+  isOpen,
+  onClose,
+  departments = [],
+  leftLinks = [],
+  rightLinks = [],
+}: MenuDropdownProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [animate, setAnimate] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
@@ -56,12 +64,42 @@ export default function MenuDropdown({ isOpen, onClose, departments = [] }: Menu
 
       {/* Panel just below the navbar */}
       <div
-        className={`absolute top-full left-0 w-full min-h-[300px] bg-white border-b border-[#010526]/10 shadow-2xl py-10 px-6 md:px-16 z-50 transition-all duration-300 ease-out grid grid-cols-1 gap-8 max-w-full text-left ${
+        className={`absolute top-full left-0 w-full min-h-[380px] bg-white border-b border-[#010526]/10 shadow-2xl py-10 px-6 md:px-16 z-50 transition-all duration-300 ease-out grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 max-w-full text-left ${
           animate ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
         }`}
       >
-        {/* Full-width Column: Categories with Images */}
-        <div className="w-full flex flex-col justify-start">
+        {/* Left Column: Menu Links */}
+        <div className="md:col-span-4 flex flex-col justify-start font-sans">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#010526]/70 mb-6 font-bold">
+            Navigation
+          </p>
+          <nav className="flex flex-col max-h-[350px] md:max-h-[calc(100vh-220px)] overflow-y-auto pr-4 custom-scrollbar">
+            {leftLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={onClose}
+                className="text-sm md:text-base font-semibold uppercase tracking-widest hover:opacity-60 transition-opacity text-[#010526] mb-4 block"
+              >
+                {link.label}
+              </a>
+            ))}
+
+            {rightLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={onClose}
+                className="text-sm md:text-base font-semibold uppercase tracking-widest hover:opacity-60 transition-opacity text-[#010526] mb-4 block"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+
+        {/* Right Column: Categories with Images */}
+        <div className="md:col-span-8 flex flex-col justify-start">
           <p className="text-xs uppercase tracking-[0.2em] text-[#010526]/70 mb-6 font-bold font-sans">
             Shop by Category
           </p>

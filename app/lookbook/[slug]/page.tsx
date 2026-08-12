@@ -125,6 +125,7 @@ export default function LookbookDetailPage({
               {lookbook.items.map((item: any) => (
                 <ProductCard
                   key={item.id}
+                  id={item.product_id || item.id}
                   imageSrc={item.image}
                   imageAlt={item.name}
                   brand={item.brand || "IndiNest"}

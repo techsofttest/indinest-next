@@ -236,7 +236,7 @@ export default function Footer() {
             your doorstep. With our runway-fresh new arrivals every week, an easy-to-navigate platform and a mobile app
             to shop on-the-go, we ensure a boutique-like feeling for a unique shopping experience.
           </p>
-          <a href="#" className="text-xs font-bold uppercase tracking-widest underline underline-offset-4">
+          <a href="/about" className="text-xs font-bold uppercase tracking-widest underline underline-offset-4">
             Read more
           </a>
         </div>

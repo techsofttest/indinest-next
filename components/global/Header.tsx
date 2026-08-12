@@ -8,7 +8,7 @@ import SearchModal from "./SearchModal";
 import MenuDropdown from "./MenuDropdown";
 import CartDrawer from "./CartDrawer";
 import { useCart } from "@/components/context/CartContext";
-import { User, ShoppingBag, LogOut } from "lucide-react";
+import { User, ShoppingBag, LogOut, Heart } from "lucide-react";
 import { apiUrl } from "@/lib/api";
 
 // Left-side nav links
@@ -35,6 +35,7 @@ export default function Header() {
   const [departments, setDepartments] = useState<any[]>([]);
   const [revealed, setRevealed] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const [categoriesState, setCategoriesState] = useState<any[]>([]);
 
@@ -110,6 +111,13 @@ export default function Header() {
       window.removeEventListener("storage", checkAuth);
     };
   }, []);
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleOutsideClick = () => setUserMenuOpen(false);
+    window.addEventListener("click", handleOutsideClick);
+    return () => window.removeEventListener("click", handleOutsideClick);
+  }, [userMenuOpen]);
 
 
   const handleLogout = () => {
@@ -262,6 +270,10 @@ export default function Header() {
                 ) : (
                   <>
                     <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setUserMenuOpen(!userMenuOpen);
+                      }}
                       aria-label="Account"
                       className="hover:opacity-60 transition-opacity flex items-center h-full cursor-pointer"
                     >
@@ -272,7 +284,11 @@ export default function Header() {
                     </button>
 
                     {/* Dropdown Menu */}
-                    <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 py-2.5">
+                    <div className={`absolute right-0 mt-2 w-64 bg-white shadow-lg transition-all duration-300 z-50 py-2.5 ${
+                      userMenuOpen
+                        ? "opacity-100 visible"
+                        : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+                    }`}>
                       <div className="flex flex-col py-1">
                         {/* User Info Header */}
                         <div className="px-5 py-2.5 mb-1.5 flex items-center gap-3">
@@ -287,13 +303,23 @@ export default function Header() {
 
                         <Link
                           href="/profile"
+                          onClick={() => setUserMenuOpen(false)}
                           className="px-5 py-3 text-sm text-[#010526] hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5"
                         >
                           <User size={16} className="opacity-75" />
                           Profile
                         </Link>
+                        <Link
+                          href="/profile/wishlist"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="px-5 py-3 text-sm text-[#010526] hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5"
+                        >
+                          <Heart size={16} className="opacity-75" />
+                          Wishlist
+                        </Link>
                          <Link
                           href="/profile/orders"
+                          onClick={() => setUserMenuOpen(false)}
                           className="px-5 py-3 text-sm text-[#010526] hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5"
                         >
                           <ShoppingBag size={16} className="opacity-75" />
@@ -301,7 +327,10 @@ export default function Header() {
                         </Link>
                         <hr className="border-[#010526]/10 my-1" />
                         <button
-                          onClick={handleLogout}
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            handleLogout();
+                          }}
                           className="w-full text-left px-5 py-2.5 text-sm text-red-600 hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5 cursor-pointer"
                         >
                           <LogOut size={16} />
@@ -335,7 +364,13 @@ export default function Header() {
           </div>
         </div>
         <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-        <MenuDropdown isOpen={menuOpen} onClose={() => setMenuOpen(false)} departments={departments} />
+        <MenuDropdown
+          isOpen={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          departments={departments}
+          leftLinks={leftLinksState}
+          rightLinks={rightLinksState}
+        />
         <CartDrawer isOpen={isCartDrawerOpen} onClose={closeCartDrawer} />
       </header >
     </>

@@ -60,6 +60,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     if (pathname.includes("/profile/orders")) activeTab = "orders";
     else if (pathname.includes("/profile/change-password")) activeTab = "change-password";
     else if (pathname.includes("/profile/addresses")) activeTab = "addresses";
+    else if (pathname.includes("/profile/wishlist")) activeTab = "wishlist";
 
     if (loading || !isLoggedIn) {
         return (

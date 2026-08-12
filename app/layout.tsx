@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PT_Serif, Playfair_Display, Great_Vibes } from "next/font/google";
 import { CartProvider } from "@/components/context/CartContext";
+import { WishlistProvider } from "@/components/context/WishlistContext";
 import "./globals.css";
 
 // Loading PT Serif with both normal and bold weights
@@ -42,7 +43,9 @@ export default function RootLayout({
       className={`${ptSerif.variable} ${playfair.variable} ${greatVibes.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-[#010526] font-serif">
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <WishlistProvider>{children}</WishlistProvider>
+        </CartProvider>
       </body>
     </html>
   );

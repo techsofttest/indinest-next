@@ -28,7 +28,31 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
         if (res.ok) {
           const data = await res.json();
           setProduct(data);
-          const available = (data.variants ?? []).filter((v: any) => (v.stock ?? 0) > 0);
+          
+          const variants = data.variants ?? [];
+          if (variants.length === 1) {
+            const singleVariant = variants[0];
+            if ((singleVariant.stock ?? 0) > 0) {
+              await addToCart({
+                product_id: data.id,
+                variant_id: singleVariant.id,
+                name: data.name,
+                brand: data.brand?.name ?? "",
+                image: resolveProductImageUrl(data.featured_image),
+                price: singleVariant.price ?? data.price ?? 0,
+                quantity: 1,
+                size: singleVariant.name || singleVariant.size || "One Size",
+                colour: data.colour || "Standard",
+                variant_name: singleVariant.name || singleVariant.size || null,
+                stock: singleVariant.stock ?? 99,
+              });
+              onClose();
+              openCartDrawer();
+              return;
+            }
+          }
+
+          const available = variants.filter((v: any) => (v.stock ?? 0) > 0);
           if (available.length > 0) {
             let cheapest = available[0];
             for (const v of available) {
@@ -46,7 +70,7 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
       }
     }
     fetchProduct();
-  }, [isOpen, slug]);
+  }, [isOpen, slug, addToCart, openCartDrawer, onClose]);
 
   if (!isOpen) return null;
 

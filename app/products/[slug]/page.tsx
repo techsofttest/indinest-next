@@ -9,6 +9,7 @@ import HeritageCarousel from "@/components/home/ProductCarousel";
 import { fetchStorefront } from "@/lib/storefront";
 import { StorefrontProduct, resolveProductImageUrl, formatPrice } from "@/lib/product";
 import { useCart } from "@/components/context/CartContext";
+import { useWishlist } from "@/components/context/WishlistContext";
 
 import ProductBreadcrumbs from "@/components/product/ProductBreadcrumbs";
 import ProductImageGallery from "@/components/product/ProductImageGallery";
@@ -49,6 +50,7 @@ export default function ProductDetailPage({
   const [isStickyBarVisible, setIsStickyBarVisible] = useState(false);
 
   const { addToCart, openCartDrawer } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const actionButtonsRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
 
@@ -69,10 +71,10 @@ export default function ProductDetailPage({
       if (productData) {
         setProduct(productData);
 
-        const available = (productData.variants ?? []).filter((v) => (v.stock ?? 0) > 0);
-        if (available.length > 0) {
-          let cheapest = available[0];
-          for (const v of available) {
+        const allVariants = productData.variants ?? [];
+        if (allVariants.length > 0) {
+          let cheapest = allVariants[0];
+          for (const v of allVariants) {
             if (v.price < cheapest.price) {
               cheapest = v;
             }
@@ -126,8 +128,14 @@ export default function ProductDetailPage({
   const handleAddToBag = async () => {
     if (!product) return;
 
-    const availableVariants = (product.variants ?? []).filter((v) => (v.stock ?? 0) > 0);
-    const selectedVariant = availableVariants.find((v) => (v.name ?? v.size ?? "") === selectedVariantName) ?? availableVariants[0];
+    const allVariants = product.variants ?? [];
+    let cheapestVariant = allVariants[0];
+    for (const v of allVariants) {
+      if (v.price < (cheapestVariant?.price ?? Infinity)) {
+        cheapestVariant = v;
+      }
+    }
+    const selectedVariant = allVariants.find((v) => (v.name ?? v.size ?? "") === selectedVariantName) ?? cheapestVariant;
     const numericPrice = selectedVariant?.price ?? product.price ?? 0;
 
     await addToCart({
@@ -151,8 +159,14 @@ export default function ProductDetailPage({
 
   const handleBuyNow = async () => {
     if (!product) return;
-    const availableVariants = (product.variants ?? []).filter((v) => (v.stock ?? 0) > 0);
-    const selectedVariant = availableVariants.find((v) => (v.name ?? v.size ?? "") === selectedVariantName) ?? availableVariants[0];
+    const allVariants = product.variants ?? [];
+    let cheapestVariant = allVariants[0];
+    for (const v of allVariants) {
+      if (v.price < (cheapestVariant?.price ?? Infinity)) {
+        cheapestVariant = v;
+      }
+    }
+    const selectedVariant = allVariants.find((v) => (v.name ?? v.size ?? "") === selectedVariantName) ?? cheapestVariant;
     const numericPrice = selectedVariant?.price ?? product.price ?? 0;
 
     await addToCart({
@@ -244,8 +258,14 @@ export default function ProductDetailPage({
       }))
     : [];
 
-  const availableVariants = (product.variants ?? []).filter((v) => (v.stock ?? 0) > 0);
-  const selectedVariant = availableVariants.find((v) => (v.name ?? v.size ?? "") === selectedVariantName) ?? availableVariants[0];
+  const allVariants = product.variants ?? [];
+  let cheapestVariant = allVariants[0];
+  for (const v of allVariants) {
+    if (v.price < (cheapestVariant?.price ?? Infinity)) {
+      cheapestVariant = v;
+    }
+  }
+  const selectedVariant = allVariants.find((v) => (v.name ?? v.size ?? "") === selectedVariantName) ?? cheapestVariant;
   const price = selectedVariant?.price ?? product.price ?? 0;
   const originalPrice = selectedVariant?.buying_price && selectedVariant.buying_price > price
     ? selectedVariant.buying_price
@@ -334,6 +354,8 @@ export default function ProductDetailPage({
             openAccordions={openAccordions}
             toggleAccordion={toggleAccordion}
             actionButtonsRef={actionButtonsRef}
+            isWishlisted={isInWishlist(product.id)}
+            onToggleWishlist={() => toggleWishlist(product)}
           />
         </div>
 

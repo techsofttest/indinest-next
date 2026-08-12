@@ -130,6 +130,10 @@ export default function AllProductsPage() {
             brand: p.brand?.name ?? "",
             price: formatPrice(price),
             originalPrice: buyingPrice && buyingPrice > price ? formatPrice(buyingPrice) : null,
+            sizes: (p.variants ?? [])
+              .filter((v: any) => (v.stock ?? 0) > 0)
+              .map((v: any) => v.name || v.size || "")
+              .filter(Boolean),
           };
         });
 
@@ -351,16 +355,16 @@ export default function AllProductsPage() {
           {/* Product Grid */}
           <div className="flex-1 min-w-0">
             {/* Toolbar */}
-            <div className="pb-6 flex items-center justify-between">
+            <div className="pb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <span className="text-base font-medium text-[#010526]/60">
                 <span className="font-bold text-[#010526] mr-2">
                   {(categories.find((c) => c.slug === activeCategory)?.name || "All")}
                 </span>
                 ({productsLoading ? "..." : `${filtered.length} ${filtered.length === 1 ? "product" : "products"}`})
               </span>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between gap-3 md:justify-end md:gap-4 w-full md:w-auto">
                 <button
-                  className="md:hidden flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[#010526] border border-[#010526]/20 px-4 py-2"
+                  className="md:hidden flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-[#010526] border border-[#010526]/20 px-4 py-2 whitespace-nowrap"
                   onClick={() => setMobileFiltersOpen(true)}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -374,7 +378,7 @@ export default function AllProductsPage() {
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value as SortOption)}
-                  className="text-sm font-bold uppercase tracking-widest text-[#010526] bg-white border border-[#010526]/20 px-4 py-2 outline-none hover:border-[#010526] transition-colors"
+                  className="text-sm font-bold uppercase tracking-widest text-[#010526] bg-white border border-[#010526]/20 px-4 py-2 outline-none hover:border-[#010526] transition-colors max-w-full"
                 >
                   {sortOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -402,12 +406,14 @@ export default function AllProductsPage() {
                   {filtered.map((product) => (
                     <ProductCard
                       key={product.id}
+                      id={product.id}
                       name={product.name}
                       brand={product.brand}
                       price={product.price}
                       originalPrice={product.originalPrice}
                       imageSrc={product.image}
                       imageAlt={product.name}
+                      sizes={product.sizes}
                       slug={product.slug}
                     />
                   ))}

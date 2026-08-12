@@ -153,7 +153,7 @@ export default function FinestEditCarousel() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <h2 className="text-xl md:text-2xl font-bold text-[#010526]">Finest Edit</h2>
         <a
-          href="#"
+          href="/products"
           className="text-[10px] uppercase tracking-widest border border-[#010526] px-4 py-2 bg-transparent hover:bg-[#010526] hover:text-[#F0F2FF] transition-colors whitespace-nowrap"
         >
           See all

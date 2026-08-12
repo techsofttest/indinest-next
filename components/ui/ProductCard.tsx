@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, Check, ShoppingBag } from "lucide-react";
+import { Loader2, Check, ShoppingBag, Heart } from "lucide-react";
 import { useCart } from "@/components/context/CartContext";
+import { useWishlist } from "@/components/context/WishlistContext";
 import QuickAddModal from "@/components/product/QuickAddModal";
 
 interface ProductCardProps {
@@ -17,6 +18,7 @@ interface ProductCardProps {
   originalPrice?: string | null;
   sizes?: string[];
   slug?: string;
+  id?: string | number;
 }
 
 export default function ProductCard({
@@ -25,13 +27,31 @@ export default function ProductCard({
   brand,
   price,
   bgColor = "bg-[#F0F2FF]",
-  className = "flex-none w-[220px] md:w-[280px] snap-start",
+  className = "flex-none md:w-[280px] snap-start",
   name,
   originalPrice,
   sizes = ["S", "M", "L", "XL", "XXL"],
   slug,
+  id,
 }: ProductCardProps) {
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const isWishlisted = id ? isInWishlist(id) : false;
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    toggleWishlist({
+      id,
+      name,
+      brand,
+      price,
+      originalPrice,
+      imageSrc,
+      slug,
+    });
+  };
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -42,6 +62,22 @@ export default function ProductCard({
   const cardContent = (
     <div className={`${className} group cursor-pointer`}>
       <div className={`w-full aspect-[4/5] group-hover:aspect-[4/4.6] transition-all duration-500 ${bgColor} mb-3 relative overflow-hidden`}>
+        {/* Wishlist button */}
+        <button
+          onClick={handleWishlistToggle}
+          className="absolute top-3 left-3 p-2.5 rounded-full bg-white/90 text-[#010526] z-10 transition-all duration-300 shadow-md hover:bg-white hover:scale-105 cursor-pointer opacity-0 group-hover:opacity-100"
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart
+            size={16}
+            className={`${
+              isWishlisted
+                ? "text-red-500 fill-red-500"
+                : "text-[#010526] hover:text-red-500"
+            } transition-colors`}
+          />
+        </button>
+
         {/* Add to Cart button */}
         <button
           onClick={handleAddToCart}
@@ -72,7 +108,7 @@ export default function ProductCard({
           {sizes && sizes.length > 0 && (
             <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 transition-all duration-500 mt-2">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold tracking-widest text-[#010526]/60">Sizes:</span>
+                <span className="text-[11px] font-bold tracking-widest text-[#010526]/60">Varients:</span>
                 <div className="flex gap-2.5">
                   {sizes.map((size) => (
                     <span key={size} className="text-xs font-bold text-[#010526]/80">{size}</span>
@@ -90,7 +126,7 @@ export default function ProductCard({
           {sizes && sizes.length > 0 && (
             <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 transition-all duration-500 mt-2 flex justify-center">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#010526]/60">Sizes:</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#010526]/60">Varients:</span>
                 <div className="flex gap-2.5">
                   {sizes.map((size) => (
                     <span key={size} className="text-xs font-bold text-[#010526]/80">{size}</span>

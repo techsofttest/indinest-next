@@ -8,13 +8,15 @@ import {
     MapPin,
     Lock,
     LogOut,
+    Heart,
 } from "lucide-react";
 
 export type ProfileTab =
     | "overview"
     | "orders"
     | "addresses"
-    | "change-password";
+    | "change-password"
+    | "wishlist";
 
 interface ProfileSidebarProps {
     activeTab: ProfileTab;
@@ -32,6 +34,7 @@ const navItems: NavItem[] = [
     { id: "orders",            label: "Orders",           icon: ShoppingBag },
     { id: "addresses",         label: "Addresses",        icon: MapPin },
     { id: "change-password",   label: "Change Password",  icon: Lock },
+    { id: "wishlist",          label: "Wishlist",         icon: Heart },
 ];
 
 const tabRoutes: Record<ProfileTab, string> = {
@@ -39,6 +42,7 @@ const tabRoutes: Record<ProfileTab, string> = {
     "orders": "/profile/orders",
     "addresses": "/profile/addresses",
     "change-password": "/profile/change-password",
+    "wishlist": "/profile/wishlist",
 };
 
 export default function ProfileSidebar({
