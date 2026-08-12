@@ -9,10 +9,12 @@ export function proxy(request: NextRequest) {
   if (isProduction) {
     // Redirect if it's the non-www domain (indinest.co.uk)
     // Or if it's the www domain but served over http (to ensure final is always https://www.indinest.co.uk)
-    if (hostname === 'indinest.co.uk' || (hostname === 'www.indinest.co.uk' && proto === 'http')) {
+    if (hostname === 'indinest.co.uk' || hostname === 'indinest.co.uk:80' || hostname === 'indinest.co.uk:443'
+      || (hostname === 'www.indinest.co.uk' && proto === 'http')) {
       const url = request.nextUrl.clone();
       url.protocol = 'https:';
       url.host = 'www.indinest.co.uk';
+      url.port = '';
       return NextResponse.redirect(url, 301);
     }
   }
