@@ -28,6 +28,11 @@ function SuccessContent() {
   const [verifying, setVerifying] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orderDetails, setOrderDetails] = useState<any | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("authToken"));
+  }, []);
 
   useEffect(() => {
     if (!orderId) {
@@ -156,9 +161,11 @@ function SuccessContent() {
             <Link href="/products" className="px-6 py-3 bg-[#010526] text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity">
               Continue Shopping
             </Link>
-            <Link href="/profile/orders" className="px-6 py-3 border border-[#010526] text-[#010526] text-xs font-bold uppercase tracking-widest hover:bg-[#010526]/5 transition-colors">
-              View Orders
-            </Link>
+            {isLoggedIn && (
+              <Link href="/profile/orders" className="px-6 py-3 border border-[#010526] text-[#010526] text-xs font-bold uppercase tracking-widest hover:bg-[#010526]/5 transition-colors">
+                View Orders
+              </Link>
+            )}
           </div>
         </div>
       </main>

@@ -95,7 +95,7 @@ function CheckoutContent() {
       }
       setCheckoutItems(finalItems);
 
-      if (!finalItems || finalItems.length === 0) {
+      if ((!finalItems || finalItems.length === 0) && !placedEnquiryDetails && !placedOrderDetails) {
         router.push("/cart");
         return;
       }
