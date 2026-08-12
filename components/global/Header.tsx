@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import SearchModal from "./SearchModal";
 import MenuDropdown from "./MenuDropdown";
-import LoginModal from "./LoginModal";
 import CartDrawer from "./CartDrawer";
 import { useCart } from "@/components/context/CartContext";
 import { User, ShoppingBag, LogOut } from "lucide-react";
@@ -79,12 +78,12 @@ export default function Header() {
     }
     loadHeaderData();
   }, []);
+  const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const { cartCount, isCartDrawerOpen, openCartDrawer, closeCartDrawer } = useCart();
+  const { cartCount, isCartDrawerOpen, openCartDrawer, closeCartDrawer, clearCart } = useCart();
 
   useEffect(() => {
     const handleOpenDrawer = () => openCartDrawer();
@@ -114,9 +113,13 @@ export default function Header() {
 
 
   const handleLogout = () => {
+    clearCart();
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("appliedPromoCode");
+    localStorage.removeItem("appliedDiscountAmount");
     setIsLoggedIn(false);
     setUserName("");
     setUserEmail("");
@@ -244,71 +247,70 @@ export default function Header() {
 
               {/* Account with Hover Dropdown */}
               <div className="relative group py-2">
-                <button
-                  aria-label="Account"
-                  onClick={() => {
-                    if (!isLoggedIn) {
-                      setLoginOpen(true);
-                    }
-                  }}
-                  className="hover:opacity-60 transition-opacity flex items-center h-full cursor-pointer"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
-                </button>
+                {!isLoggedIn ? (
+                  <Link
+                    href="/login"
+                    title="Login or Signup"
+                    aria-label="Login or Signup"
+                    className="hover:opacity-60 transition-opacity flex items-center h-full cursor-pointer"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </Link>
+                ) : (
+                  <>
+                    <button
+                      aria-label="Account"
+                      className="hover:opacity-60 transition-opacity flex items-center h-full cursor-pointer"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                      </svg>
+                    </button>
 
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 py-2.5">
-                  {!isLoggedIn ? (
-                    <div className="px-4 py-2 flex flex-col items-center">
-                      {/* <p className="text-[10px] text-[#010526]/50 uppercase tracking-widest mb-3 text-center font-bold">Access your account</p> */}
-                      <button
-                        onClick={() => setLoginOpen(true)}
-                        className="w-full py-2 bg-[#010526] text-white text-[10px] font-bold uppercase tracking-widest hover:opacity-90 transition-opacity text-center cursor-pointer"
-                      >
-                        Login / Sign Up
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col py-1">
-                      {/* User Info Header */}
-                      <div className="px-5 py-2.5 mb-1.5 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#010526] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
-                          {getInitials(userName)}
+                    {/* Dropdown Menu */}
+                    <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 py-2.5">
+                      <div className="flex flex-col py-1">
+                        {/* User Info Header */}
+                        <div className="px-5 py-2.5 mb-1.5 flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-[#010526] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            {getInitials(userName)}
+                          </div>
+                          <div className="flex flex-col min-w-0 -mt-0.5">
+                            <p className="text-sm font-bold text-[#010526] truncate tracking-wide uppercase">{userName}</p>
+                            <p className="text-[11px] text-[#010526]/70 truncate tracking-wider mt-0.5">{userEmail}</p>
+                          </div>
                         </div>
-                        <div className="flex flex-col min-w-0 -mt-0.5">
-                          <p className="text-sm font-bold text-[#010526] truncate tracking-wide uppercase">{userName}</p>
-                          <p className="text-[11px] text-[#010526]/70 truncate tracking-wider mt-0.5">{userEmail}</p>
-                        </div>
+
+                        <Link
+                          href="/profile"
+                          className="px-5 py-3 text-sm text-[#010526] hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5"
+                        >
+                          <User size={16} className="opacity-75" />
+                          Profile
+                        </Link>
+                         <Link
+                          href="/profile/orders"
+                          className="px-5 py-3 text-sm text-[#010526] hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5"
+                        >
+                          <ShoppingBag size={16} className="opacity-75" />
+                          Order History
+                        </Link>
+                        <hr className="border-[#010526]/10 my-1" />
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-5 py-2.5 text-sm text-red-600 hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5 cursor-pointer"
+                        >
+                          <LogOut size={16} />
+                          Logout
+                        </button>
                       </div>
-
-                      <Link
-                        href="/profile"
-                        className="px-5 py-3 text-sm text-[#010526] hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5"
-                      >
-                        <User size={16} className="opacity-75" />
-                        Profile
-                      </Link>
-                      <Link
-                        href="/orders"
-                        className="px-5 py-3 text-sm text-[#010526] hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5"
-                      >
-                        <ShoppingBag size={16} className="opacity-75" />
-                        Order History
-                      </Link>
-                      <hr className="border-[#010526]/10 my-1" />
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-5 py-2.5 text-sm text-red-600 hover:bg-[#010526]/5 transition-colors uppercase tracking-widest font-semibold flex items-center gap-2.5 cursor-pointer"
-                      >
-                        <LogOut size={16} />
-                        Logout
-                      </button>
                     </div>
-                  )}
-                </div>
+                  </>
+                )}
               </div>
 
               {/* Cart */}
@@ -334,7 +336,6 @@ export default function Header() {
         </div>
         <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
         <MenuDropdown isOpen={menuOpen} onClose={() => setMenuOpen(false)} departments={departments} />
-        <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
         <CartDrawer isOpen={isCartDrawerOpen} onClose={closeCartDrawer} />
       </header >
     </>

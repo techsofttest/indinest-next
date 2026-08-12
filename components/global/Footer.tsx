@@ -273,10 +273,10 @@ export default function Footer() {
 
         <div className="flex flex-col gap-3">
           <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Legal</h5>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Terms of Use</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Privacy Policy</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Shipping Policy</a>
-          <a href="#" className="text-[#010526]/70 hover:text-[#010526]">Return Policy</a>
+          <Link href="/terms-of-use" className="text-[#010526]/70 hover:text-[#010526]">Terms of Use</Link>
+          <Link href="/privacy-policy" className="text-[#010526]/70 hover:text-[#010526]">Privacy Policy</Link>
+          <Link href="/shipping-policy" className="text-[#010526]/70 hover:text-[#010526]">Shipping Policy</Link>
+          <Link href="/return-policy" className="text-[#010526]/70 hover:text-[#010526]">Return Policy</Link>
         </div>
 
         

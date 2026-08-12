@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { MapPin, Plus, Trash2, CheckCircle2, Loader2 } from "lucide-react";
-import { PhoneInput, defaultCountries } from "react-international-phone";
-import "react-international-phone/style.css";
+
 import { apiUrl } from "@/lib/api";
 
 interface Address {
@@ -39,9 +38,10 @@ export default function AddressesTab() {
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
     const [postcode, setPostcode] = useState("");
-    const [country, setCountry] = useState("United Kingdom");
+    const [country, setCountry] = useState("GB");
     const [deliveryNotes, setDeliveryNotes] = useState("");
     const [label, setLabel] = useState("");
+    const [countries, setCountries] = useState<any[]>([]);
 
     const fetchAddresses = async () => {
         setLoading(true);
@@ -72,8 +72,21 @@ export default function AddressesTab() {
         }
     };
 
+    const fetchCountries = async () => {
+        try {
+            const res = await fetch(apiUrl("/api/countries"));
+            if (res.ok) {
+                const data = await res.json();
+                setCountries(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch countries:", err);
+        }
+    };
+
     useEffect(() => {
         fetchAddresses();
+        fetchCountries();
     }, []);
 
     const handleSetDefault = async (id: number) => {
@@ -160,6 +173,7 @@ export default function AddressesTab() {
             }
 
             setIsAdding(false);
+            window.scrollTo({ top: 0, behavior: "smooth" });
             // Reset form
             setContactName("");
             setPhone("");
@@ -201,7 +215,10 @@ export default function AddressesTab() {
                 {!isAdding && (
                     <button
                         type="button"
-                        onClick={() => setIsAdding(true)}
+                        onClick={() => {
+                            setIsAdding(true);
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
                         className="inline-flex items-center gap-1.5 bg-[#010526] text-white text-xs font-semibold px-4 py-2.5 transition-all hover:bg-[#010526]/90 cursor-pointer"
                     >
                         <Plus size={15} />
@@ -242,14 +259,13 @@ export default function AddressesTab() {
                             <label className="block text-xs font-semibold text-[#010526]/80 uppercase tracking-wider mb-1.5">
                                 Mobile Number*
                             </label>
-                            <PhoneInput
-                                defaultCountry="gb"
-                                countries={defaultCountries.filter((c) => ["gb", "ie", "de"].includes(c[1]))}
+                            <input
+                                type="tel"
                                 value={phone}
-                                onChange={(val) => setPhone(val)}
-                                style={{ '--react-international-phone-border-radius': '0' } as React.CSSProperties}
-                                inputClassName="w-full !bg-transparent !border-l-0 !text-sm !font-sans !text-[#010526] focus:!outline-none !rounded-none"
-                                className="[&.react-international-phone-input-container]:border [&.react-international-phone-input-container]:border-[#010526]/20 focus-within:[&.react-international-phone-input-container]:border-[#010526]/80 [&.react-international-phone-input-container]:rounded-none bg-white h-[40px]"
+                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                                placeholder="Mobile Number"
+                                required
+                                className="w-full bg-white border border-[#010526]/20 px-4 py-2.5 text-sm text-[#010526] focus:outline-none focus:border-[#010526]/80"
                             />
                         </div>
 
@@ -339,14 +355,23 @@ export default function AddressesTab() {
                             <label className="block text-xs font-semibold text-[#010526]/80 uppercase tracking-wider mb-1.5">
                                 Country*
                             </label>
-                            <input
-                                type="text"
+                            <select
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
-                                placeholder="Country"
+                                className="w-full bg-white border border-[#010526]/20 px-4 py-2.5 text-sm text-[#010526] focus:outline-none focus:border-[#010526]/80 h-[42px]"
                                 required
-                                className="w-full bg-white border border-[#010526]/20 px-4 py-2.5 text-sm text-[#010526] focus:outline-none focus:border-[#010526]/80"
-                            />
+                            >
+                                <option value="" disabled>Select Country*</option>
+                                {countries.length === 0 ? (
+                                    <option value="GB">United Kingdom</option>
+                                ) : (
+                                    countries.map((c) => (
+                                        <option key={c.id} value={c.code}>
+                                            {c.name}
+                                        </option>
+                                    ))
+                                )}
+                            </select>
                         </div>
 
                         <div>
@@ -385,7 +410,10 @@ export default function AddressesTab() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => setIsAdding(false)}
+                            onClick={() => {
+                                setIsAdding(false);
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
                             className="bg-[#010526]/5 text-[#010526] text-xs font-semibold px-5 py-2.5 transition-all hover:bg-[#010526]/10 cursor-pointer"
                         >
                             Cancel
@@ -415,7 +443,7 @@ export default function AddressesTab() {
                                         <MapPin size={16} className="text-[#010526]" />
                                         {addr.contact_name} {addr.label && <span className="text-xs font-normal text-[#010526]/50">({addr.label})</span>}
                                     </span>
-                                    {addr.is_default_shipping && (
+                                    {!!addr.is_default_shipping && (
                                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1">
                                             <CheckCircle2 size={14} />
                                             Default
@@ -427,7 +455,7 @@ export default function AddressesTab() {
                                     {addr.address_line_1}<br />
                                     {addr.address_line_2 && <>{addr.address_line_2}<br /></>}
                                     {addr.suburb && <>{addr.suburb}, </>}{addr.city}, {addr.state} - {addr.postcode}<br />
-                                    {addr.country}<br />
+                                    {countries.find((c) => c.code === addr.country)?.name || addr.country}<br />
                                     Phone: {addr.phone}
                                 </p>
                             </div>

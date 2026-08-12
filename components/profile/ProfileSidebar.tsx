@@ -5,16 +5,16 @@ import Link from "next/link";
 import {
     LayoutDashboard,
     ShoppingBag,
-    User,
     MapPin,
+    Lock,
     LogOut,
 } from "lucide-react";
 
 export type ProfileTab =
     | "overview"
     | "orders"
-    | "personal-details"
-    | "addresses";
+    | "addresses"
+    | "change-password";
 
 interface ProfileSidebarProps {
     activeTab: ProfileTab;
@@ -30,15 +30,15 @@ interface NavItem {
 const navItems: NavItem[] = [
     { id: "overview",          label: "Overview",         icon: LayoutDashboard },
     { id: "orders",            label: "Orders",           icon: ShoppingBag },
-    { id: "personal-details",  label: "Personal Details", icon: User },
     { id: "addresses",         label: "Addresses",        icon: MapPin },
+    { id: "change-password",   label: "Change Password",  icon: Lock },
 ];
 
 const tabRoutes: Record<ProfileTab, string> = {
     "overview": "/profile",
     "orders": "/profile/orders",
-    "personal-details": "/profile/details",
     "addresses": "/profile/addresses",
+    "change-password": "/profile/change-password",
 };
 
 export default function ProfileSidebar({

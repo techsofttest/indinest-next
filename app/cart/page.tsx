@@ -7,6 +7,7 @@ import { Plus, Minus, Trash2, ShieldCheck, ArrowRight, ShoppingBag, Percent, Ale
 import Header from "@/components/global/Header";
 import Footer from "@/components/global/Footer";
 import { useCart, CartItem } from "@/components/context/CartContext";
+import { apiUrl } from "@/lib/api";
 
 export default function CartPage() {
   const { cartItems, cartTotal, cartCount, updateCartItem, removeFromCart, clearCart } = useCart();
@@ -29,9 +30,19 @@ export default function CartPage() {
   }, []);
 
   const [promoCode, setPromoCode] = useState("");
-  const [appliedDiscount, setAppliedDiscount] = useState(0); // percentage
+  const [appliedDiscountAmount, setAppliedDiscountAmount] = useState(0);
   const [promoError, setPromoError] = useState("");
   const [promoSuccess, setPromoSuccess] = useState("");
+
+  useEffect(() => {
+    const savedCode = localStorage.getItem("appliedPromoCode");
+    const savedDiscount = localStorage.getItem("appliedDiscountAmount");
+    if (savedCode && savedDiscount) {
+      setPromoCode(savedCode);
+      setAppliedDiscountAmount(parseFloat(savedDiscount));
+      setPromoSuccess(`Promo code '${savedCode}' applied! £${savedDiscount} discount has been subtracted.`);
+    }
+  }, []);
 
   const updateQuantity = (id: string, delta: number) => {
     const item = cartItems.find((item) => item.id === id);
@@ -49,25 +60,52 @@ export default function CartPage() {
     removeFromCart(id);
   };
 
-  const handleApplyPromo = (e: React.FormEvent) => {
+  const handleApplyPromo = async (e: React.FormEvent) => {
     e.preventDefault();
     setPromoError("");
     setPromoSuccess("");
 
-    if (promoCode.toUpperCase() === "FIRST10") {
-      setAppliedDiscount(10);
-      setPromoSuccess("Promo code 'FIRST10' applied! 10% discount has been subtracted.");
-    } else if (promoCode.trim() === "") {
+    if (promoCode.trim() === "") {
       setPromoError("Please enter a promo code.");
-    } else {
-      setPromoError("Invalid promo code. Try using 'FIRST10'.");
+      return;
+    }
+
+    try {
+      const res = await fetch(apiUrl("/api/coupons/validate"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          coupon_code: promoCode,
+          subtotal: cartTotal,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.valid) {
+        setAppliedDiscountAmount(data.discount);
+        setPromoSuccess(`Promo code '${data.coupon.coupon_code}' applied! £${data.discount} discount has been subtracted.`);
+        localStorage.setItem("appliedPromoCode", data.coupon.coupon_code);
+        localStorage.setItem("appliedDiscountAmount", String(data.discount));
+      } else {
+        setPromoError(data.message || "Invalid promo code.");
+        setAppliedDiscountAmount(0);
+        localStorage.removeItem("appliedPromoCode");
+        localStorage.removeItem("appliedDiscountAmount");
+      }
+    } catch (err) {
+      setPromoError("Failed to validate promo code.");
+      setAppliedDiscountAmount(0);
+      localStorage.removeItem("appliedPromoCode");
+      localStorage.removeItem("appliedDiscountAmount");
     }
   };
 
   const subtotal = cartTotal;
-  const discountAmount = (subtotal * appliedDiscount) / 100;
+  const discountAmount = appliedDiscountAmount;
   const shipping = 0;
-  const total = subtotal - discountAmount;
+  const total = Math.max(0, subtotal - discountAmount);
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-white text-[#010526] font-serif">
@@ -211,10 +249,10 @@ export default function CartPage() {
                   <span className="font-semibold text-[#010526]">£{subtotal.toLocaleString()}</span>
                 </div>
 
-                {appliedDiscount > 0 && (
+                {appliedDiscountAmount > 0 && (
                   <div className="flex justify-between text-emerald-600">
                     <span className="flex items-center gap-1">
-                      <Percent size={12} /> Discount ({appliedDiscount}%)
+                      <Percent size={12} /> Discount
                     </span>
                     <span className="font-semibold">- £{discountAmount.toLocaleString()}</span>
                   </div>

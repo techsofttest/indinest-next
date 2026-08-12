@@ -23,8 +23,8 @@ interface ProductCarouselProps {
 
 export default function HeritageCarousel({
   products = [],
-  title = "New Styles from the Heritage Collection",
-  subtitle = "Sale Last Call • Extra 20% Off",
+  title = "New Styles from IndiNest",
+  subtitle = "Explore our latest products",
   showSeeAll = true,
 }: ProductCarouselProps) {
   const trackRef = useRef<HTMLDivElement>(null);

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 interface BannerSlide {
@@ -25,7 +24,7 @@ export default function OfferBanner({
   href = "#",
   variant = "default",
 }: OfferBannerProps) {
-  const finalSlides = slides || [{ imageSrc, altText, href }];
+  const finalSlides = (slides && slides.length > 0) ? slides : [{ imageSrc, altText, href }];
   const [currentSlide, setCurrentSlide] = useState(0);
 
   // Auto-play effect: cycle slides every 5 seconds
@@ -49,13 +48,10 @@ export default function OfferBanner({
           href={slide.href || "#"}
           className="block relative w-full aspect-[21/9] overflow-hidden bg-[#F0F2FF] group"
         >
-          <Image
+          <img
             src={slide.imageSrc}
             alt={slide.altText || "Offer Banner"}
-            fill
-            sizes="(max-width: 1600px) 100vw, 1600px"
-            className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
-            priority
+            className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.02]"
           />
         </Link>
       </section>
@@ -74,13 +70,10 @@ export default function OfferBanner({
               idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
             }`}
           >
-            <Image
+            <img
               src={slide.imageSrc}
               alt={slide.altText || `Banner Slide ${idx + 1}`}
-              fill
-              sizes="(max-width: 1600px) 100vw, 1600px"
-              className="object-cover object-center"
-              priority={idx === 0}
+              className="absolute inset-0 w-full h-full object-cover object-center"
             />
           </Link>
         ))}

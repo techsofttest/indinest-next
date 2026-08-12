@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import Button from "@/components/ui/Button";
+import { ShoppingBag } from "lucide-react";
+import QuickAddModal from "@/components/product/QuickAddModal";
+import { formatPrice } from "@/lib/product";
 
 interface SlideItem {
   id: number;
@@ -13,6 +14,8 @@ interface SlideItem {
   image: string;
   slug: string;
   url: string;
+  brand?: string;
+  price?: number;
 }
 
 interface SlideData {
@@ -31,6 +34,7 @@ interface LookbookSliderProps {
 
 export default function LookbookSlider({ slides = [] }: LookbookSliderProps) {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [activeQuickAddSlug, setActiveQuickAddSlug] = useState<string | null>(null);
 
   if (!slides || slides.length === 0) return null;
 
@@ -73,13 +77,10 @@ export default function LookbookSlider({ slides = [] }: LookbookSliderProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-stretch max-w-[1600px] mx-auto">
         {/* Left Side: Large image of the look/model */}
         <div className="relative w-full min-h-[450px] md:h-full bg-[#f8f8f8] overflow-hidden group">
-          <Image
+          <img
             src={currentSlide.model_image}
             alt={currentSlide.model_alt || currentSlide.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            priority={currentSlideIndex === 0}
+            className="absolute inset-0 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
           />
         </div>
 
@@ -99,55 +100,53 @@ export default function LookbookSlider({ slides = [] }: LookbookSliderProps) {
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-6">
             {currentSlide.items.map((item) => (
-              <Link
-                href={item.url}
+              <div
                 key={item.id}
                 className="flex flex-col items-center text-center group cursor-pointer"
               >
                 <div className="relative w-full aspect-[4/3] bg-[#fdfdfd] mb-2 overflow-hidden flex items-center justify-center border border-[#010526]/5">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={150}
-                    height={112}
-                    className="object-contain max-h-[85%] transition-transform duration-500 group-hover:scale-105"
-                    style={{ width: "auto", height: "auto" }}
-                  />
+                  <Link href={item.url} className="w-full h-full flex items-center justify-center">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="object-contain max-h-[85%] transition-transform duration-500 group-hover:scale-105"
+                      style={{ width: "auto", height: "auto" }}
+                    />
+                  </Link>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setActiveQuickAddSlug(item.slug);
+                    }}
+                    className="absolute top-3 right-3 p-2.5 rounded-full bg-white/90 text-[#010526] z-10 transition-all duration-300 shadow-md hover:bg-white hover:scale-105 cursor-pointer opacity-0 group-hover:opacity-100"
+                    aria-label="Add to cart"
+                  >
+                    <ShoppingBag size={16} className="text-[#010526]" />
+                  </button>
                 </div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#010526] mb-1">
-                  {item.name}
-                </h4>
+                <Link href={item.url}>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#010526] mb-1 hover:text-[#010526]/80 transition-colors">
+                    {item.name}
+                  </h4>
+                </Link>
                 <p className="text-[11px] uppercase tracking-wider text-[#010526]/70">
                   {item.category}
                 </p>
-              </Link>
+              </div>
             ))}
-          </div>
-
-          <div className="mt-12 flex justify-center w-full">
-            <Link href={`/lookbook/${currentSlide.slug}`} className="max-w-[280px] w-full">
-              <Button
-                variant="primary"
-                size="md"
-                className="w-full tracking-[0.2em] font-semibold flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-3.5 h-3.5 fill-none stroke-current"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
-                Shop the Look
-              </Button>
-            </Link>
           </div>
         </div>
       </div>
+
+      {activeQuickAddSlug && (
+        <QuickAddModal
+          slug={activeQuickAddSlug}
+          isOpen={!!activeQuickAddSlug}
+          onClose={() => setActiveQuickAddSlug(null)}
+        />
+      )}
     </section>
   );
 }

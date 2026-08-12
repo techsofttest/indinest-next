@@ -28,11 +28,11 @@ export default function HeroSection() {
             Heritage Sarees
           </h2>
           <Button
-            href="#"
+            href="/products"
             variant="white"
             className="tracking-[0.2em] px-6 py-2.5 transition-all text-xs"
           >
-            Shop Heritage
+            Explore Products
           </Button>
         </div>
       </div>
@@ -62,11 +62,11 @@ export default function HeroSection() {
             Designer Sarees
           </h2>
           <Button
-            href="#"
+            href="/products"
             variant="white"
             className="tracking-[0.2em] px-6 py-2.5 transition-all text-xs"
           >
-            Shop Contemporary
+            Explore Products
           </Button>
         </div>
       </div>

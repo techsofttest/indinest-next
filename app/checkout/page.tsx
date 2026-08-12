@@ -46,7 +46,7 @@ function CheckoutContent() {
     standard: 4.00,
     express: 6.00,
   });
-  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("standard");
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState<string>("");
 
   // Address Form State
   const [addressForm, setAddressForm] = useState({
@@ -69,6 +69,9 @@ function CheckoutContent() {
     );
     const resolvedType = found?.checkout_type || "payment";
     setCheckoutType(resolvedType);
+    if (resolvedType === "enquiry") {
+      setSelectedShippingMethod("");
+    }
     return resolvedType;
   };
 
@@ -174,6 +177,40 @@ function CheckoutContent() {
     initializeCheckout();
   }, [cartItems, isDirect]);
 
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const token = localStorage.getItem("authToken");
+      const isLoggedInUser = !!token;
+      setIsLoggedIn(isLoggedInUser);
+      if (!isLoggedInUser) {
+        setSavedAddresses([]);
+        setSelectedAddressId("manual");
+        setAddressForm({
+          contact_name: "",
+          phone: "",
+          email: "",
+          address_line_1: "",
+          address_line_2: "",
+          suburb: "",
+          city: "",
+          state: "",
+          postcode: "",
+          country: "United Kingdom",
+          delivery_notes: "",
+        });
+        setCheckoutType("payment");
+        setSelectedShippingMethod("");
+      }
+    };
+
+    window.addEventListener("auth-change", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+    return () => {
+      window.removeEventListener("auth-change", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
+    };
+  }, []);
+
   const handleAddressSelect = (id: string) => {
     setSelectedAddressId(id);
     const userEmail = localStorage.getItem("userEmail") || "";
@@ -226,6 +263,10 @@ function CheckoutContent() {
     if (!addressForm.city) errors.push("City is required.");
     if (!addressForm.postcode) errors.push("Postcode is required.");
 
+    if (checkoutType === 'payment' && !selectedShippingMethod) {
+      errors.push("Please select a shipping method.");
+    }
+
     if (errors.length > 0) {
       setCheckoutErrors(errors);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -265,9 +306,10 @@ function CheckoutContent() {
       }
     }
 
-    // 2. Proceed with checkout order placement
     const items = isDirect && checkoutItems !== null ? checkoutItems : cartItems;
     const payload = {
+      coupon_code: typeof window !== 'undefined' ? (localStorage.getItem("appliedPromoCode") || null) : null,
+      shipping_method: selectedShippingMethod || null,
       cart: items.map(item => {
         let realProductId: any = item.product_id;
         if (!realProductId && typeof item.id === "string") {
@@ -329,6 +371,8 @@ function CheckoutContent() {
             address: addressForm,
           });
           clearCart();
+          localStorage.removeItem("appliedPromoCode");
+          localStorage.removeItem("appliedDiscountAmount");
           window.dispatchEvent(new Event("cart-change"));
         } else if (data.checkout_url) {
           // Redirect to Stripe hosted checkout page
@@ -337,13 +381,15 @@ function CheckoutContent() {
           setPlacedOrderDetails({
             orderNumber: data.order_number,
             items: items,
-            shippingCost: shippingRates[selectedShippingMethod] ?? 4.00,
+            shippingCost: selectedShippingMethod ? (shippingRates[selectedShippingMethod] ?? 4.00) : 0,
             subtotal: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-            total: items.reduce((sum, item) => sum + item.price * item.quantity, 0) + (shippingRates[selectedShippingMethod] ?? 4.00),
+            total: Math.max(0, items.reduce((sum, item) => sum + item.price * item.quantity, 0) - (typeof window !== 'undefined' ? parseFloat(localStorage.getItem("appliedDiscountAmount") || "0") : 0) + (selectedShippingMethod ? (shippingRates[selectedShippingMethod] ?? 4.00) : 0)),
             address: addressForm,
             shippingMethod: selectedShippingMethod
           });
           clearCart();
+          localStorage.removeItem("appliedPromoCode");
+          localStorage.removeItem("appliedDiscountAmount");
           window.dispatchEvent(new Event("cart-change"));
         }
       } else {
@@ -370,8 +416,9 @@ function CheckoutContent() {
 
   const items = isDirect && checkoutItems !== null ? checkoutItems : cartItems;
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shippingCost = shippingRates[selectedShippingMethod] ?? 4.00;
-  const total = subtotal + shippingCost;
+  const shippingCost = selectedShippingMethod ? (shippingRates[selectedShippingMethod] ?? 4.00) : 0;
+  const appliedDiscountAmount = typeof window !== 'undefined' ? parseFloat(localStorage.getItem("appliedDiscountAmount") || "0") : 0;
+  const total = Math.max(0, subtotal - appliedDiscountAmount + shippingCost);
 
   if (initializing) {
     return (
@@ -532,7 +579,7 @@ function CheckoutContent() {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
 
           {/* Left Column: Checkout Forms */}
-          <div className="w-full lg:w-[55%] flex flex-col">
+          <div className="w-full lg:w-[55%] flex flex-col order-2 lg:order-1">
             <h1 className="text-3xl font-light uppercase tracking-wider text-[#010526] mb-8">
               Checkout
             </h1>
@@ -637,7 +684,7 @@ function CheckoutContent() {
                     required
                     disabled={selectedAddressId !== "manual"}
                     value={addressForm.phone}
-                    onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                    onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value.replace(/\D/g, "") })}
                     className="col-span-1 bg-transparent border border-[#010526]/20 px-4 py-3 text-sm font-sans focus:outline-none focus:border-[#010526] rounded-none disabled:opacity-50 disabled:bg-[#010526]/[0.02]"
                   />
                 </div>
@@ -747,7 +794,7 @@ function CheckoutContent() {
                 </div>
               </div>
 
-              {checkoutType === 'payment' && (
+              {checkoutType === 'payment' && addressForm.country && (
                 /* Shipping Method */
                 <div className="flex flex-col gap-4">
                   <h2 className="text-lg font-bold font-sans text-[#010526]">Shipping Method</h2>
@@ -807,7 +854,7 @@ function CheckoutContent() {
           </div>
 
           {/* Right Column: Order Summary */}
-          <div className="w-full lg:w-[45%] bg-[#010526]/[0.02] p-6 md:p-8">
+          <div className="w-full lg:w-[45%] bg-[#010526]/[0.02] p-6 md:p-8 order-1 lg:order-2">
             <h2 className="text-xl uppercase tracking-wider font-light text-[#010526] pb-6 border-b border-[#010526]/10">
               Order Summary
             </h2>
@@ -837,10 +884,16 @@ function CheckoutContent() {
                 <span>Subtotal</span>
                 <span className="font-semibold text-[#010526]">£{subtotal.toLocaleString()}</span>
               </div>
+              {appliedDiscountAmount > 0 && (
+                <div className="flex justify-between text-emerald-700 font-semibold">
+                  <span>Discount ({typeof window !== 'undefined' ? localStorage.getItem("appliedPromoCode") : ''})</span>
+                  <span>-£{appliedDiscountAmount.toFixed(2)}</span>
+                </div>
+              )}
                <div className="flex justify-between">
-                <span>Shipping {checkoutType === 'payment' ? `(${selectedShippingMethod.toUpperCase()})` : ''}</span>
+                <span>Shipping {checkoutType === 'payment' && selectedShippingMethod ? `(${selectedShippingMethod.toUpperCase()})` : ''}</span>
                 <span className="font-semibold text-[#010526]">
-                  {checkoutType === 'enquiry' ? 'To be confirmed' : `£${shippingCost.toFixed(2)}`}
+                  {checkoutType === 'enquiry' ? 'To be confirmed' : (selectedShippingMethod ? `£${shippingCost.toFixed(2)}` : 'Select method')}
                 </span>
               </div>
               <div className="border-t border-[#010526]/10 pt-4 mt-2 flex justify-between text-base md:text-lg font-serif text-[#010526]">

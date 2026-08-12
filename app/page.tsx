@@ -12,7 +12,7 @@ import { fetchStorefront } from "@/lib/storefront";
 import { StorefrontProduct, resolveProductImageUrl, formatPrice } from "@/lib/product";
 
 export default async function Home() {
-  const [productsData, categoriesData, departmentsData, lookbooksData] = await Promise.all([
+  const [productsData, categoriesData, departmentsData, lookbooksData, homeData] = await Promise.all([
     fetchStorefront<{ data: StorefrontProduct[]; meta?: unknown }>(
       "/api/storefront/products?per_page=12&sort=latest&featured=false"
     ),
@@ -38,6 +38,7 @@ export default async function Home() {
       }>
     >("/api/storefront/departments"),
     fetchStorefront<any[]>("/api/storefront/lookbooks"),
+    fetchStorefront<any>("/api/storefront/home"),
   ]);
 
   // Map API products to the ProductCarousel format
@@ -94,6 +95,12 @@ export default async function Home() {
       sort_order: dept.sort_order ?? 0,
     }));
 
+  const ads = (homeData?.advertisements ?? []).map((ad: any) => ({
+    imageSrc: ad.banner_url,
+    altText: ad.title || ad.name,
+    href: ad.url || "#",
+  }));
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-white text-[#010526]">
       <Header />
@@ -104,7 +111,7 @@ export default async function Home() {
         <CategorySection departments={departments} />
         <ShopByCategory categories={shopCategories} />
         <EditorialGrid />
-        <OfferBanner />
+        <OfferBanner slides={ads} />
         <LookbookSlider slides={lookbooksData ?? []} />
       </main>
 

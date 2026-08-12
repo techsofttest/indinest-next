@@ -58,7 +58,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     // Determine active tab based on pathname
     let activeTab: ProfileTab = "overview";
     if (pathname.includes("/profile/orders")) activeTab = "orders";
-    else if (pathname.includes("/profile/details") || pathname.includes("/profile/personal-details")) activeTab = "personal-details";
+    else if (pathname.includes("/profile/change-password")) activeTab = "change-password";
     else if (pathname.includes("/profile/addresses")) activeTab = "addresses";
 
     if (loading || !isLoggedIn) {
