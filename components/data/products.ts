@@ -24,6 +24,7 @@ export interface Product {
   isBestSeller?: boolean;
   isNewArrival?: boolean;
   availability?: string;
+  sizeChart?: string | null;
 }
 
 export const menCategories = [

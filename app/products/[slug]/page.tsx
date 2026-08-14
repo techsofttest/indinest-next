@@ -319,6 +319,7 @@ export default function ProductDetailPage({
     keyFeatures: product.key_features ?? "",
     demand: 0,
     availability: "In Stock",
+    sizeChart: product.size_chart ?? "",
   };
 
   return (
@@ -370,7 +371,12 @@ export default function ProductDetailPage({
           </div>
         )}
 
-        {isSizeGuideOpen && <SizeGuideModal onClose={() => setIsSizeGuideOpen(false)} />}
+        {isSizeGuideOpen && (
+          <SizeGuideModal
+            onClose={() => setIsSizeGuideOpen(false)}
+            sizeChartHtml={product.size_chart ?? ""}
+          />
+        )}
       </main>
 
       <div ref={footerRef}>

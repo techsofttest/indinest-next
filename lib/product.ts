@@ -27,6 +27,7 @@ export interface StorefrontProduct {
     stock: number;
   }>;
   description?: string | null;
+  size_chart?: string | null;
   key_features?: string | null;
   style_fit_tips?: string | null;
   shipping_returns?: string | null;

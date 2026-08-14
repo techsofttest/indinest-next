@@ -2,17 +2,10 @@
 
 interface SizeGuideModalProps {
   onClose: () => void;
+  sizeChartHtml?: string;
 }
 
-const sizeRows = [
-  { size: "S",   chest: "36 - 38", waist: "30 - 32", length: "38" },
-  { size: "M",   chest: "38 - 40", waist: "32 - 34", length: "39" },
-  { size: "L",   chest: "40 - 42", waist: "34 - 36", length: "40" },
-  { size: "XL",  chest: "42 - 44", waist: "36 - 38", length: "41" },
-  { size: "XXL", chest: "44 - 46", waist: "38 - 40", length: "42" },
-];
-
-export default function SizeGuideModal({ onClose }: SizeGuideModalProps) {
+export default function SizeGuideModal({ onClose, sizeChartHtml }: SizeGuideModalProps) {
   return (
     <>
       {/* Backdrop */}
@@ -26,7 +19,7 @@ export default function SizeGuideModal({ onClose }: SizeGuideModalProps) {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold uppercase tracking-wider text-[#010526]">
-            Men's Size Guide
+            Size Guide
           </h3>
           <button
             onClick={onClose}
@@ -40,39 +33,37 @@ export default function SizeGuideModal({ onClose }: SizeGuideModalProps) {
           </button>
         </div>
 
-        {/* Size Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm md:text-base border-collapse">
-            <thead>
-              <tr className="border-b border-[#010526]/20 text-[#010526]/60">
-                <th className="py-3 font-bold uppercase tracking-wider">Size</th>
-                <th className="py-3 font-bold uppercase tracking-wider">Chest (in)</th>
-                <th className="py-3 font-bold uppercase tracking-wider">Waist (in)</th>
-                <th className="py-3 font-bold uppercase tracking-wider">Length (in)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#010526]/10 text-[#010526]">
-              {sizeRows.map((row) => (
-                <tr key={row.size} className="hover:bg-[#F0F2FF]/20 transition-colors">
-                  <td className="py-3 font-bold">{row.size}</td>
-                  <td className="py-3">{row.chest}</td>
-                  <td className="py-3">{row.waist}</td>
-                  <td className="py-3">{row.length}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Dynamic size chart */}
+        <div 
+          className="prose max-w-none text-sm text-[#010526] leading-relaxed dynamic-size-chart"
+          dangerouslySetInnerHTML={{ __html: sizeChartHtml || "" }}
+        />
 
-        {/* Fitting tips */}
-        <div className="mt-8 text-xs text-[#010526]/60 leading-relaxed">
-          <p className="font-bold mb-1">Fitting Tips:</p>
-          <p>
-            Ethnic wear outfits are designed to have a slightly looser silhouette. If you are in
-            between sizes, we recommend ordering the larger size for a more relaxed and comfortable
-            fit.
-          </p>
-        </div>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .dynamic-size-chart table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+          }
+          .dynamic-size-chart th, 
+          .dynamic-size-chart td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(1, 5, 38, 0.1);
+            text-align: left;
+          }
+          .dynamic-size-chart th {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: rgba(1, 5, 38, 0.6);
+            border-bottom: 2px solid rgba(1, 5, 38, 0.2);
+          }
+          .dynamic-size-chart tr:hover {
+            background-color: rgba(240, 242, 255, 0.4);
+          }
+        `}} />
       </div>
     </>
   );
