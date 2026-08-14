@@ -71,7 +71,8 @@ export default function Header() {
         setRightLinksState([
           ...(depts ?? []).map((dept: any) => ({
             label: dept.name,
-            href: `/departments/${dept.slug}`
+            href: `/departments/${dept.slug}`,
+            subdepartments: dept.subdepartments || []
           }))
         ]);
       } catch (err) {
@@ -251,6 +252,34 @@ export default function Header() {
             <nav className="hidden md:flex items-center gap-7 text-[11px] font-semibold uppercase tracking-widest">
               {rightLinksState.map((link: any) => {
                 const isActive = link.href !== "#" && pathname.startsWith(link.href);
+
+                if (link.subdepartments && link.subdepartments.length > 0) {
+                  return (
+                    <div key={link.label} className="relative group py-2">
+                      <a
+                        href={link.href}
+                        className={`relative flex items-center gap-1 transition-opacity after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[1px] after:bg-[#010526] after:transition-all after:duration-300 hover:after:w-full text-[#010526] ${isActive ? "after:w-full opacity-100" : "after:w-0 hover:opacity-60"}`}
+                      >
+                        {link.label}
+                        <svg className="w-3 h-3 ml-0.5 opacity-70 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </a>
+                      <div className="absolute left-0 mt-2 w-48 bg-white shadow-xl border border-gray-100/50 py-2.5 z-50 rounded-xs transition-all duration-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0">
+                        {link.subdepartments.map((sub: any) => (
+                          <a
+                            key={sub.id}
+                            href={sub.href}
+                            className="block px-4 py-2 text-[10px] tracking-widest uppercase font-semibold text-[#010526] hover:bg-gray-50 hover:text-[#010526] transition-colors"
+                          >
+                            {sub.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <a
                     key={link.label}
