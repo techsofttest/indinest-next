@@ -22,6 +22,15 @@ export default function MenuDropdown({
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [animate, setAnimate] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
+  const [expandedLinks, setExpandedLinks] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (label: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedLinks(prev => ({
+      ...prev,
+      [label]: !prev[label]
+    }));
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -74,27 +83,101 @@ export default function MenuDropdown({
             Navigation
           </p>
           <nav className="flex flex-col max-h-[350px] md:max-h-[calc(100vh-220px)] overflow-y-auto pr-4 custom-scrollbar">
-            {leftLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={onClose}
-                className="text-sm md:text-base font-semibold uppercase tracking-widest hover:opacity-60 transition-opacity text-[#010526] mb-4 block"
-              >
-                {link.label}
-              </a>
-            ))}
+            {leftLinks.map((link: any) => {
+              const hasSubs = link.subcategories && link.subcategories.length > 0;
+              const isExpanded = !!expandedLinks[link.label];
+              return (
+                <div key={link.label} className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <a
+                      href={link.href}
+                      onClick={onClose}
+                      className="text-sm md:text-base font-semibold uppercase tracking-widest hover:opacity-60 transition-opacity text-[#010526]"
+                    >
+                      {link.label}
+                    </a>
+                    {hasSubs && (
+                      <button
+                        onClick={(e) => toggleExpand(link.label, e)}
+                        className="p-1 text-[#010526] hover:opacity-60 focus:outline-none cursor-pointer"
+                      >
+                        {isExpanded ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 12H4" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  {hasSubs && isExpanded && (
+                    <div className="pl-4 mt-2 flex flex-col gap-2 border-l border-[#010526]/10">
+                      {link.subcategories.map((sub: any) => (
+                        <a
+                          key={sub.id}
+                          href={sub.href}
+                          onClick={onClose}
+                          className="text-xs font-semibold uppercase tracking-widest hover:opacity-60 text-[#010526]/75"
+                        >
+                          {sub.name}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
-            {rightLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={onClose}
-                className="text-sm md:text-base font-semibold uppercase tracking-widest hover:opacity-60 transition-opacity text-[#010526] mb-4 block"
-              >
-                {link.label}
-              </a>
-            ))}
+            {rightLinks.map((link: any) => {
+              const hasSubs = link.subdepartments && link.subdepartments.length > 0;
+              const isExpanded = !!expandedLinks[link.label];
+              return (
+                <div key={link.label} className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <a
+                      href={link.href}
+                      onClick={onClose}
+                      className="text-sm md:text-base font-semibold uppercase tracking-widest hover:opacity-60 transition-opacity text-[#010526]"
+                    >
+                      {link.label}
+                    </a>
+                    {hasSubs && (
+                      <button
+                        onClick={(e) => toggleExpand(link.label, e)}
+                        className="p-1 text-[#010526] hover:opacity-60 focus:outline-none cursor-pointer"
+                      >
+                        {isExpanded ? (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 12H4" />
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  {hasSubs && isExpanded && (
+                    <div className="pl-4 mt-2 flex flex-col gap-2 border-l border-[#010526]/10">
+                      {link.subdepartments.map((sub: any) => (
+                        <a
+                          key={sub.id}
+                          href={sub.href}
+                          onClick={onClose}
+                          className="text-xs font-semibold uppercase tracking-widest hover:opacity-60 text-[#010526]/75"
+                        >
+                          {sub.name}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </div>
 
