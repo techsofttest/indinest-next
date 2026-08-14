@@ -21,11 +21,13 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
 
   useEffect(() => {
     if (!isOpen || !slug) return;
+    let isSubscribed = true;
+
     async function fetchProduct() {
       setLoading(true);
       try {
         const res = await fetch(apiUrl(`/api/storefront/products/${slug}`));
-        if (res.ok) {
+        if (res.ok && isSubscribed) {
           const data = await res.json();
           setProduct(data);
           
@@ -61,20 +63,34 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
               }
             }
             setSelectedVariantId(cheapest.id);
+          } else if (variants.length > 0) {
+            setSelectedVariantId(variants[0].id);
           }
         }
       } catch (err) {
         console.error("Failed to load product for quick add:", err);
       } finally {
-        setLoading(false);
+        if (isSubscribed) {
+          setLoading(false);
+        }
       }
     }
     fetchProduct();
-  }, [isOpen, slug, addToCart, openCartDrawer, onClose]);
+
+    return () => {
+      isSubscribed = false;
+    };
+    // Only run when modal opens or slug changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, slug]);
 
   if (!isOpen) return null;
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
     if (!product || !selectedVariantId) return;
     const variant = product.variants.find((v: any) => v.id === selectedVariantId);
     if (!variant) return;
@@ -99,16 +115,40 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onClose();
+        }}
+      />
 
       {/* Modal */}
-      <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-[#010526]/10 flex flex-col font-serif">
+      <div
+        className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-[#010526]/10 flex flex-col font-serif z-10"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#010526]/10">
           <span className="text-sm font-bold uppercase tracking-widest text-[#010526]">Quick Add Options</span>
-          <button onClick={onClose} className="text-[#010526] hover:opacity-60 transition-opacity">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onClose();
+            }}
+            className="text-[#010526] hover:opacity-60 transition-opacity p-1 cursor-pointer"
+          >
             <X size={20} />
           </button>
         </div>
@@ -154,13 +194,20 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
                     return (
                       <button
                         key={v.id}
+                        type="button"
                         disabled={outOfStock}
-                        onClick={() => setSelectedVariantId(v.id)}
-                        className={`px-4 py-2.5 rounded-full text-xs font-sans font-bold transition-all border ${
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          if (!outOfStock) {
+                            setSelectedVariantId(v.id);
+                          }
+                        }}
+                        className={`px-4 py-2.5 rounded-full text-xs font-sans font-bold transition-all border cursor-pointer ${
                           active
-                            ? "bg-[#010526] border-[#010526] text-white"
+                            ? "bg-[#010526] border-[#010526] text-white shadow-sm scale-105"
                             : "border-[#010526]/20 hover:border-[#010526] text-[#010526]"
-                        } ${outOfStock ? "opacity-30 cursor-not-allowed line-through" : ""}`}
+                        } ${outOfStock ? "opacity-30 !cursor-not-allowed line-through" : ""}`}
                       >
                         {v.name || v.size || "Standard"}
                       </button>
@@ -171,9 +218,10 @@ export default function QuickAddModal({ slug, isOpen, onClose }: QuickAddModalPr
 
               {/* Action Button */}
               <button
+                type="button"
                 onClick={handleAddToCart}
                 disabled={adding || !selectedVariantId}
-                className="w-full py-4 bg-[#010526] text-white text-xs font-sans font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2 rounded-full disabled:opacity-50"
+                className="w-full py-4 bg-[#010526] text-white text-xs font-sans font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2 rounded-full disabled:opacity-50 cursor-pointer shadow-md mt-2"
               >
                 {adding ? (
                   <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />

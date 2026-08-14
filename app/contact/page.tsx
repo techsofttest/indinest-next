@@ -8,9 +8,12 @@ import Footer from "@/components/global/Footer";
 import PageBanner from "@/components/common/PageBanner";
 import { PhoneInput, defaultCountries } from "react-international-phone";
 import "react-international-phone/style.css";
+import { apiUrl } from "@/lib/api";
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,13 +22,37 @@ export default function ContactPage() {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       alert("Please fill in all required fields.");
       return;
     }
-    setFormSubmitted(true);
+    setSubmitting(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(apiUrl("/storefront/contact"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setFormSubmitted(true);
+      } else {
+        setErrorMessage(result.message ?? "Something went wrong. Please try again.");
+      }
+    } catch (err) {
+      console.error("Failed to submit contact form:", err);
+      setErrorMessage("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -244,11 +271,18 @@ export default function ContactPage() {
                     />
                   </div>
 
+                   {errorMessage && (
+                    <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-200 p-3 rounded-none">
+                      {errorMessage}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full py-3 bg-[#010526] text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm mt-1"
+                    disabled={submitting}
+                    className="w-full py-3 bg-[#010526] text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity flex items-center justify-center gap-2 cursor-pointer shadow-sm mt-1 disabled:opacity-50"
                   >
-                    <span>Send Enquiry</span>
+                    <span>{submitting ? "Sending..." : "Send Enquiry"}</span>
                     <Send size={12} />
                   </button>
                 </form>

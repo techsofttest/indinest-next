@@ -78,9 +78,6 @@ export default function ShopByCategory({ categories: initialCategories }: ShopBy
               <h3 className="text-sm md:text-base font-bold tracking-wider uppercase text-[#010526] mb-0.5 group-hover:opacity-75 transition-opacity">
                 {cat.name}
               </h3>
-              <p className="text-[10px] md:text-xs uppercase tracking-widest text-[#010526]/60 font-semibold">
-                {cat.count}
-              </p>
             </div>
           </a>
         ))}
