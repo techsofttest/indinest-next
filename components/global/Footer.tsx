@@ -8,22 +8,22 @@ import { apiUrl } from "@/lib/api";
 
 export default function Footer() {
   const [categories, setCategories] = useState<any[]>([]);
-  const [departments, setDepartments] = useState<any[]>([]);
+  const [collections, setCollections] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadFooterData() {
       try {
-        const [catRes, deptRes] = await Promise.all([
+        const [catRes, colRes] = await Promise.all([
           fetch(apiUrl("/api/storefront/categories")),
-          fetch(apiUrl("/api/storefront/departments"))
+          fetch(apiUrl("/api/storefront/collections"))
         ]);
         if (catRes.ok) {
           const data = await catRes.json();
           setCategories(data ?? []);
         }
-        if (deptRes.ok) {
-          const deptData = await deptRes.json();
-          setDepartments(deptData ?? []);
+        if (colRes.ok) {
+          const colData = await colRes.json();
+          setCollections(colData ?? []);
         }
       } catch (err) {
         console.error("Failed to load footer data:", err);
@@ -253,10 +253,10 @@ export default function Footer() {
 
         
         <div className="flex flex-col gap-3">
-          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Departments</h5>
-          {departments.map((dept: any) => (
-            <a key={dept.id} href={`/departments/${dept.slug}`} className="text-[#010526]/70 hover:text-[#010526]">
-              {dept.name}
+          <h5 className="font-bold uppercase tracking-widest text-[10px] mb-2">Collections</h5>
+          {collections.map((col: any) => (
+            <a key={col.id} href={`/collections/${col.slug}`} className="text-[#010526]/70 hover:text-[#010526]">
+              {col.name}
             </a>
           ))}
         </div>

@@ -62,6 +62,7 @@ export default function Header() {
 
         setLeftLinksState([
           { label: "All Products", href: "/products" },
+          { label: "Best Sellers", href: "/collections/best-sellers" },
           ...homeFeaturedCats.map((cat: any) => ({
             label: cat.name,
             href: cat.href || `/category/${cat.slug}`,
