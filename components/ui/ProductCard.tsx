@@ -70,18 +70,17 @@ export default function ProductCard({
         >
           <Heart
             size={16}
-            className={`${
-              isWishlisted
+            className={`${isWishlisted
                 ? "text-red-500 fill-red-500"
                 : "text-[#010526] hover:text-red-500"
-            } transition-colors`}
+              } transition-colors`}
           />
         </button>
 
         {/* Add to Cart button */}
         <button
           onClick={handleAddToCart}
-          className="absolute top-3 right-3 p-2.5 rounded-full bg-white/90 text-[#010526] z-10 transition-all duration-300 shadow-md hover:bg-white hover:scale-105 cursor-pointer opacity-0 group-hover:opacity-100"
+          className="absolute top-3 right-3 p-2.5 rounded-full bg-white/90 text-[#010526] z-10 transition-all duration-300 shadow-md hover:bg-white cursor-pointer opacity-0 group-hover:opacity-100"
           aria-label="Add to cart"
         >
           <ShoppingBag size={16} className="text-[#010526]" />
@@ -104,7 +103,7 @@ export default function ProductCard({
               <span className="text-sm text-[#010526]/55 line-through">{originalPrice}</span>
             )}
           </div>
-          {/* Sizes below price */}
+          {/* Sizes below price 
           {sizes && sizes.length > 0 && (
             <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-10 group-hover:opacity-100 transition-all duration-500 mt-2">
               <div className="flex items-center gap-2">
@@ -117,6 +116,7 @@ export default function ProductCard({
               </div>
             </div>
           )}
+          */}
         </div>
       ) : (
         <div className="text-center">
