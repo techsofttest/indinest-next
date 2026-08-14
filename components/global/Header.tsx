@@ -64,7 +64,8 @@ export default function Header() {
           { label: "All Products", href: "/products" },
           ...homeFeaturedCats.map((cat: any) => ({
             label: cat.name,
-            href: cat.href || `/category/${cat.slug}`
+            href: cat.href || `/category/${cat.slug}`,
+            subcategories: cat.subcategories || []
           }))
         ]);
         setRightLinksState([
@@ -178,6 +179,32 @@ export default function Header() {
                   );
                 }
 
+                if (link.subcategories && link.subcategories.length > 0) {
+                  return (
+                    <div key={link.label} className="relative group py-2">
+                      <a
+                        href={link.href}
+                        className="relative flex items-center gap-1 text-[#010526] hover:opacity-60 transition-opacity after:content-[''] after:absolute after:left-0 after:-bottom-0.5 after:h-[1px] after:w-0 after:bg-[#010526] after:transition-all after:duration-300 hover:after:w-full"
+                      >
+                        {link.label}
+                        <svg className="w-3 h-3 ml-0.5 opacity-70 group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </a>
+                      <div className="absolute left-0 mt-2 w-48 bg-white shadow-xl border border-gray-100/50 py-2.5 z-50 rounded-xs transition-all duration-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0">
+                        {link.subcategories.map((sub: any) => (
+                          <a
+                            key={sub.id}
+                            href={sub.href}
+                            className="block px-4 py-2 text-[10px] tracking-widest uppercase font-semibold text-[#010526] hover:bg-gray-50 hover:text-[#010526] transition-colors"
+                          >
+                            {sub.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
 
                 return (
                   <a
