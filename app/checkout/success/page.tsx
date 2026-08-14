@@ -119,10 +119,16 @@ function SuccessContent() {
           <AlertTriangle className="w-16 h-16 text-red-600 mb-6" />
           <h1 className="text-2xl font-light uppercase tracking-wider mb-2">Payment Verification Failed</h1>
           <p className="text-sm font-sans text-[#010526]/70 mb-8">{error}</p>
-          <div className="flex gap-4">
-            <Link href="/checkout" className="px-6 py-3 bg-[#010526] text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity">
-              Return to Checkout
-            </Link>
+          <p className="text-sm font-sans text-[#010526]/70 mb-8">You can check the status again by retrying or you will get an email once payment is successfull</p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 bg-[#010526] text-white text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity cursor-pointer"
+            >
+              Check Again
+            </button>
+            
           </div>
         </main>
         <Footer />
