@@ -9,13 +9,18 @@ import { apiUrl } from "@/lib/api";
 export default function Footer() {
   const [categories, setCategories] = useState<any[]>([]);
   const [collections, setCollections] = useState<any[]>([]);
+  const [rates, setRates] = useState<{ standard: number; express: number }>({
+    standard: 4.45,
+    express: 6.45,
+  });
 
   useEffect(() => {
     async function loadFooterData() {
       try {
-        const [catRes, colRes] = await Promise.all([
+        const [catRes, colRes, ratesRes] = await Promise.all([
           fetch(apiUrl("/api/storefront/categories")),
-          fetch(apiUrl("/api/storefront/collections"))
+          fetch(apiUrl("/api/storefront/collections")),
+          fetch(apiUrl("/api/shipping/rates"))
         ]);
         if (catRes.ok) {
           const data = await catRes.json();
@@ -24,6 +29,15 @@ export default function Footer() {
         if (colRes.ok) {
           const colData = await colRes.json();
           setCollections(colData ?? []);
+        }
+        if (ratesRes.ok) {
+          const ratesData = await ratesRes.json();
+          if (ratesData && typeof ratesData === 'object') {
+            setRates({
+              standard: ratesData.standard ?? 4.45,
+              express: ratesData.express ?? 6.45
+            });
+          }
         }
       } catch (err) {
         console.error("Failed to load footer data:", err);
@@ -188,8 +202,8 @@ export default function Footer() {
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-[#010526] mb-1">Delivery Rates</span>
             <span className="text-xs text-[#010526]/70 leading-normal">
-              Standard UK: £4.45 <br />
-              Express: £5.95 <span className="line-through opacity-50 ml-1">£9.95</span>
+              Standard UK: £{rates.standard.toFixed(2)} <br />
+              Express: £{rates.express.toFixed(2)}
             </span>
           </div>
         </div>
