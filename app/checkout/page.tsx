@@ -463,7 +463,7 @@ function CheckoutContent() {
 
             <div className="w-full border-t border-b border-[#010526]/10 py-6 my-6 text-left font-sans text-sm flex flex-col gap-4">
               <h2 className="text-base font-bold font-serif uppercase tracking-wider text-[#010526]">Requested Items</h2>
-              
+
               <div className="flex flex-col gap-3">
                 {placedEnquiryDetails.items.map((item: any) => (
                   <div key={item.id} className="flex justify-between items-center text-xs">
@@ -527,7 +527,7 @@ function CheckoutContent() {
 
             <div className="w-full border-t border-b border-[#010526]/10 py-6 my-6 text-left font-sans text-sm flex flex-col gap-4">
               <h2 className="text-base font-bold font-serif uppercase tracking-wider text-[#010526]">Order Summary</h2>
-              
+
               <div className="flex flex-col gap-3">
                 {placedOrderDetails.items.map((item: any) => (
                   <div key={item.id} className="flex justify-between items-center text-xs">
@@ -610,7 +610,7 @@ function CheckoutContent() {
             )}
 
             <form onSubmit={handlePlaceOrder} className="flex flex-col gap-8">
-              
+
               {/* Saved Addresses List (For logged in users) */}
               {isLoggedIn && savedAddresses.length > 0 && (
                 <div className="flex flex-col gap-4">
@@ -620,17 +620,16 @@ function CheckoutContent() {
                       <label
                         key={addr.id}
                         onClick={() => handleAddressSelect(String(addr.id))}
-                        className={`flex items-start gap-4 p-4 border cursor-pointer transition-all ${
-                          selectedAddressId === String(addr.id)
+                        className={`flex items-start gap-4 p-4 border cursor-pointer transition-all ${selectedAddressId === String(addr.id)
                             ? "border-[#010526] bg-[#010526]/[0.02]"
                             : "border-[#010526]/20 hover:border-[#010526]/40"
-                        }`}
+                          }`}
                       >
                         <input
                           type="radio"
                           name="selectedAddressId"
                           checked={selectedAddressId === String(addr.id)}
-                          onChange={() => {}}
+                          onChange={() => { }}
                           className="accent-[#010526] mt-1"
                         />
                         <div className="flex-1 text-xs">
@@ -650,17 +649,16 @@ function CheckoutContent() {
 
                     <label
                       onClick={() => handleAddressSelect("manual")}
-                      className={`flex items-center gap-4 p-4 border cursor-pointer transition-all ${
-                        selectedAddressId === "manual"
+                      className={`flex items-center gap-4 p-4 border cursor-pointer transition-all ${selectedAddressId === "manual"
                           ? "border-[#010526] bg-[#010526]/[0.02]"
                           : "border-[#010526]/20 hover:border-[#010526]/40"
-                      }`}
+                        }`}
                     >
                       <input
                         type="radio"
                         name="selectedAddressId"
                         checked={selectedAddressId === "manual"}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         className="accent-[#010526]"
                       />
                       <span className="font-bold text-sm text-[#010526]">Enter a new delivery address</span>
@@ -692,7 +690,7 @@ function CheckoutContent() {
                     onChange={(e) => setAddressForm({ ...addressForm, email: e.target.value })}
                     className="col-span-1 bg-transparent border border-[#010526]/20 px-4 py-3 text-sm font-sans focus:outline-none focus:border-[#010526] rounded-none disabled:opacity-50 disabled:bg-[#010526]/[0.02]"
                   />
-                  
+
                   <input
                     type="tel"
                     placeholder="Phone Number*"
@@ -839,7 +837,8 @@ function CheckoutContent() {
               {/* Action Buttons */}
               {checkoutType === 'enquiry' && (
                 <div className="mt-6 p-4 bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold font-sans rounded-none leading-relaxed">
-                  We&apos;re currently unable to process online orders outside the United Kingdom and Ireland. Submit an enquiry and our team will contact you regarding delivery options and final pricing.
+                  We&apos;re currently unable to process online orders outside the United Kingdom. Submit an enquiry and our team will contact you regarding delivery options and final pricing.
+                  Or contact us through <Link href="https://wa.me/message/QYKOHGHF6WLCD1" target="_blank" className="color-green">whatsapp</Link> to place an order
                 </div>
               )}
 
@@ -905,7 +904,7 @@ function CheckoutContent() {
                   <span>-£{appliedDiscountAmount.toFixed(2)}</span>
                 </div>
               )}
-               <div className="flex justify-between">
+              <div className="flex justify-between">
                 <span>Shipping {checkoutType === 'payment' && selectedShippingMethod ? `(${selectedShippingMethod.toUpperCase()})` : ''}</span>
                 <span className="font-semibold text-[#010526]">
                   {checkoutType === 'enquiry' ? 'To be confirmed' : (selectedShippingMethod ? `£${shippingCost.toFixed(2)}` : 'Select method')}

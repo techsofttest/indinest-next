@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PT_Serif, Playfair_Display, Great_Vibes } from "next/font/google";
 import { CartProvider } from "@/components/context/CartContext";
 import { WishlistProvider } from "@/components/context/WishlistContext";
+import WhatsAppButton from "@/components/global/WhatsAppButton";
 import "./globals.css";
 
 // Loading PT Serif with both normal and bold weights
@@ -44,7 +45,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white text-[#010526] font-serif">
         <CartProvider>
-          <WishlistProvider>{children}</WishlistProvider>
+          <WishlistProvider>
+            {children}
+            <WhatsAppButton />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>
