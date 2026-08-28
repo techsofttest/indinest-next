@@ -199,6 +199,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = async (item: Omit<CartItem, "id"> & { id?: string }) => {
     const parsedItem = normalizeCartItem(item);
+    if (parsedItem.isOutOfStock || (parsedItem.stock !== undefined && parsedItem.stock <= 0)) {
+      return;
+    }
     if (backendAvailable) {
       try {
         const response = await fetch(apiUrl("/api/cart"), {

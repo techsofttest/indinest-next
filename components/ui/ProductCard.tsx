@@ -61,7 +61,7 @@ export default function ProductCard({
 
   const cardContent = (
     <div className={`${className} group cursor-pointer`}>
-      <div className={`w-full aspect-[4/5] group-hover:aspect-[4/4.6] transition-all duration-500 ${bgColor} mb-3 relative overflow-hidden`}>
+      <div className={`w-full aspect-[4/5] group-hover:aspect-[4/4.6] transition-all duration-500 mb-3 relative overflow-hidden`}>
         {/* Wishlist button */}
         <button
           onClick={handleWishlistToggle}
@@ -89,7 +89,7 @@ export default function ProductCard({
         <img
           src={imageSrc}
           alt={imageAlt}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
         />
       </div>
 
